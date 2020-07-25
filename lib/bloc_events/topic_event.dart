@@ -9,14 +9,14 @@ enum TopicEventType {
 class TopicEvent {
   TopicModel topic;
   TopicEventType type;
+  int topidId;
 
   TopicEvent.addTopic(TopicModel model) {
     this.topic = model;
     this.type = TopicEventType.add;
   }
 
-  TopicEvent.deleteTopic(TopicModel model) {
-    this.topic = model;
+  TopicEvent.deleteTopicWithID(this.topidId) {
     this.type = TopicEventType.delete;
   }
 

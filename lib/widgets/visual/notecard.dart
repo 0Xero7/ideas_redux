@@ -14,7 +14,7 @@ class NoteCard extends StatelessWidget {
   NoteCard(this.data);
 
   // hard limit of 512 words
-  List<Widget> buildThumbnail() {
+  List<Widget> buildThumbnail(context) {
     var res = List<Widget>();
     final int limit = 256;
 
@@ -30,7 +30,8 @@ class NoteCard extends StatelessWidget {
           
           count += limitedString.length;
           res.add(Text(
-            limitedString
+            limitedString,
+            style: Theme.of(context).textTheme.subtitle2,
           ));
           break;
 
@@ -90,7 +91,7 @@ class NoteCard extends StatelessWidget {
                 const SizedBox(height: 5),
 
                 Column(
-                  children: buildThumbnail(),
+                  children: buildThumbnail(context),
                 )
               ],
             ),

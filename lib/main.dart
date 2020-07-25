@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
 import 'package:ideas_redux/database/notesdb.dart';
+import 'package:ideas_redux/database/topicsdb.dart';
 import 'package:ideas_redux/pages/stackedpage.dart';
 import 'package:ideas_redux/routes/routegenerator.dart';
 import 'package:ideas_redux/state/note_state.dart';
@@ -18,8 +19,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // TODO: move this to a dedicated loading page
+  await TopicsDB.initDB();
+  var _topics = await TopicsDB.loadTopics();
+
   TopicState _topicState = TopicState();
-  for (var i in TestNoteData.topics)
+  for (var i in _topics)
     _topicState.addTopic(i);
 
   NoteState _state = NoteState();
@@ -52,7 +56,7 @@ class MyApp extends StatelessWidget {
       
       child: MaterialApp(
         title: 'inScribe',
-        theme: lightTheme,
+        theme: darkTheme,
 
         initialRoute: '/',
         onGenerateRoute: RouteGenerator.generateRoute,

@@ -18,9 +18,9 @@ class TopicState {
     topics[model.id] = model;
   }
 
-  void deleteTopic(TopicModel model) {
-    assert(topics.containsKey(model.id));
-    topics.remove(model.id);
+  void deleteTopic(int id) {
+    assert(topics.containsKey(id));
+    topics.remove(id);
   }
 
   void updateTopic(TopicModel model) {

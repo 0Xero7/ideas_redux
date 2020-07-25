@@ -161,15 +161,20 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
               right: 0,
               bottom: 0,
 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 0,
-                    child: BlocConsumer<TopicBloc, TopicState>(
-                      listener: (_, __) {},
-                      builder: (context, state) {
-                        return TabBar(
+              child: BlocConsumer<TopicBloc, TopicState>(
+                listener: (context, state) {
+                  _tabController = TabController(
+                    length: state.topics.length,
+                    vsync: this
+                  );
+                },
+                builder: (context, state) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 0,
+                        child: TabBar(
                           controller: _tabController,
                           isScrollable: true, 
                           indicatorPadding: EdgeInsets.all(5),
@@ -179,22 +184,22 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
                             (index) => 
                               Tab(child: Text(state.topics.values.elementAt(index).topicName, style: Theme.of(context).textTheme.subtitle1,),)
                           )
-                        );
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: List.generate(
-                        BlocProvider.of<TopicBloc>(context).state.topics.length, 
-                        (index) => buildStaggeredGridView(
-                          BlocProvider.of<TopicBloc>(context).state.topics.keys.elementAt(index)
                         )
-                      )
-                    ),
-                  ),
-                ],
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: List.generate(
+                            BlocProvider.of<TopicBloc>(context).state.topics.length, 
+                            (index) => buildStaggeredGridView(
+                              BlocProvider.of<TopicBloc>(context).state.topics.keys.elementAt(index)
+                            )
+                          )
+                        ),
+                      ),
+                    ],
+                  );
+                }
               )
             ),
           ],

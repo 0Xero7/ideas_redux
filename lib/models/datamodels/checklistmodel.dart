@@ -11,6 +11,11 @@ class ChecklistModel extends BaseDataModel {
     return model;
   }
 
+  ChecklistModel.emptyWithEntry() {
+    data = List<ChecklistElementModel>();
+    addEmpty();
+  }
+
   toMap() {
     return {
       'type': 'checklist',

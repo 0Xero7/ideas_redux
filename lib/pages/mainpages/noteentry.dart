@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:ideas_redux/bloc_events/note_event.dart';
 import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 import 'package:ideas_redux/models/notemodel.dart';
+import 'package:ideas_redux/state/topic_state.dart';
 import 'package:ideas_redux/widgets/back.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
 import 'package:ideas_redux/widgets/visual/checklist.dart';
@@ -106,6 +108,113 @@ class _NoteEntry extends State<NoteEntry> {
     return res;
   }
 
+  Widget _buildTopicButton(BuildContext context) {
+    final TopicState state = BlocProvider.of<TopicBloc>(context).state;
+
+    return Container(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Material(
+          color: Theme.of(context).buttonColor,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+
+            onTap: () async {
+              var _itKeys = state.topics.keys.iterator;
+              _itKeys.moveNext();
+
+              var res = await showDialog(
+                barrierColor: Colors.black.withAlpha(1),
+                
+                context: context,
+                builder: (context) => Stack(
+                  children: [
+                    Positioned(
+                      top: 132,
+                      left: 59,
+                      right: 8,
+
+                      child: Container(
+                        //height: 300,
+
+                        child: Material(
+                          elevation: 5,
+                          shadowColor: Colors.black26,
+                          color: Theme.of(context).buttonColor,
+                          borderRadius: BorderRadius.circular(8),
+
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+
+                              children: [
+                                Text(
+                                  state.topics[widget.model.topicId].topicName,
+                                  style: Theme.of(context).textTheme.subtitle1,
+                                ),
+                                Divider(),
+                                ConstrainedBox(
+                                  constraints: BoxConstraints.loose(
+                                    Size(double.infinity, 150)
+                                  ),
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: state.topics.length,
+                                    itemBuilder: (context, index) {
+                                      final topicName = state.topics[ _itKeys.current ].topicName;
+                                      final topicID = _itKeys.current;
+                                      _itKeys.moveNext();
+
+                                      return Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () => Navigator.pop(context, topicID),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(topicName, style: Theme.of(context).textTheme.subtitle1),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]
+                )
+              );
+              
+              if (res != null) {
+                setState(() {
+                  widget.model.topicId = res;
+                });
+              }
+            },
+
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(state.topics[widget.model.topicId].topicName, style: Theme.of(context).textTheme.subtitle1,),
+                  Icon(Icons.arrow_drop_down)
+                ],
+              ),
+            ),
+          ),
+        )
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,10 +271,10 @@ class _NoteEntry extends State<NoteEntry> {
             top: 80,
             left:  0,
             right: 0,
-            bottom: 0,
 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -183,43 +292,26 @@ class _NoteEntry extends State<NoteEntry> {
                   ),
                 ),
                 const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: DropdownButton(
-                    elevation: 1,
-                    isDense: true,
-                    underline: Container(),
-                    icon: Icon(Icons.arrow_drop_down),
-                    value: widget.model.topicId,
-
-                    items: List.generate(
-                      BlocProvider.of<TopicBloc>(context).state.topics.length,
-                      (index) => DropdownMenuItem(
-                        value: BlocProvider.of<TopicBloc>(context).state.topics.values.elementAt(index).id,
-                        child: Text('${BlocProvider.of<TopicBloc>(context).state.topics.values.elementAt(index).topicName}')
-                      )
-                    ),
-
-                    onChanged: (e) { 
-                      print(e); 
-                      setState(() => widget.model.topicId = e);
-                    },
-                  )
+                Row(
+                  children: [
+                    const SizedBox(width: 13),
+                    Text('Topic', style: Theme.of(context).textTheme.subtitle1),
+                    Expanded(child: _buildTopicButton(context)),
+                  ],
                 ),
-
-                const SizedBox(height: 5),
                 Divider()
               ]
             ),
           ),
 
           Positioned(
-            top: 175,
+            top: 180,
             left: 0,
             right: 0,
             bottom: 0,
             
             child: ListView(
+              padding: EdgeInsets.only(bottom: 35),
               children: _createNonReorderList(),
               
               
@@ -272,6 +364,60 @@ class _NoteEntry extends State<NoteEntry> {
               //   // ),
 
               // ],
+            ),
+          ),
+
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+
+            child: Container(
+              height: 40,
+              color: Theme.of(context).cardColor.withAlpha(200),
+
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: MaterialButton(
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            widget.model.data.add(TextDataModel(''));
+                          });
+                        },
+                        child: Icon(Icons.text_format),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: MaterialButton(
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            widget.model.data.add(
+                              ChecklistModel.emptyWithEntry()
+                            );
+                          });
+                        },
+                        child: Icon(Icons.list),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           )
         ],

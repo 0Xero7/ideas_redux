@@ -68,7 +68,7 @@ class _StackedPageState extends State<StackedPage> {
   Widget _buildBottomBar(context) {
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
-      color: Colors.white,
+      //color: Colors.white,
 
       child: Container(
         child: Row(
