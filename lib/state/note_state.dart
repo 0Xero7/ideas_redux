@@ -99,7 +99,7 @@ class NoteState {
     assert(noteRef.containsKey(oldModel.id));
 
     notesInCategory[oldModel.topicId].removeWhere((key) => key == oldModel.id);
-    notesInCategory[newModel.topicId].add(newModel.id);
+    _addNoteToCategory(newModel);
   }
 
   void debug() {

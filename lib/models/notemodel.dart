@@ -23,9 +23,9 @@ class NoteModel {
   //     ]
   //  }
 
-  NoteModel.empty() {
+  NoteModel.empty(int topicID) {
     id = -1;
-    topicId = 1;
+    this.topicId = topicID;
     title = null;
     data = List<BaseDataModel>();
     data.add(TextDataModel(null));

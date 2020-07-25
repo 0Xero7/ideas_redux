@@ -105,7 +105,8 @@ class _StackedPageState extends State<StackedPage> {
           onPressed: () async { 
             switch (currentIndex) {
               case 0:
-                Navigator.pushNamed(context, '/editentry', arguments: NoteModel.empty()); 
+                final _state = BlocProvider.of<TopicBloc>(context).state.topics.keys.first;
+                Navigator.pushNamed(context, '/editentry', arguments: NoteModel.empty(_state)); 
                 break;
               case 1:
                 changeAppState(AppState.addingTopic);

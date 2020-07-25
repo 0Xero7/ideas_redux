@@ -10,13 +10,18 @@ import 'package:ideas_redux/database/topicsdb.dart';
 import 'package:ideas_redux/pages/stackedpage.dart';
 import 'package:ideas_redux/routes/routegenerator.dart';
 import 'package:ideas_redux/state/note_state.dart';
+import 'package:ideas_redux/state/settings_state.dart';
 import 'package:ideas_redux/state/topic_state.dart';
 import 'package:ideas_redux/testdata/testnotes.dart';
 import 'package:ideas_redux/themes.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  var _settingsState = SettingsState();
+  await _settingsState.init();
 
   // TODO: move this to a dedicated loading page
   await TopicsDB.initDB();
@@ -33,33 +38,39 @@ void main() async {
   for (var i in _notes)
     _state.addNote(i);
 
-  runApp(MyApp(_state, _topicState));
+  runApp(MyApp(_state, _topicState, _settingsState));
 }
 
 class MyApp extends StatelessWidget {
   NoteState _state;
   TopicState _topicState;
-  MyApp(this._state, this._topicState);
+  SettingsState _settingsState;
+  MyApp(this._state, this._topicState, this._settingsState);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => NoteBloc(_state),
-        ),
-        BlocProvider(
-          create: (context) => TopicBloc(_topicState),
-        )
-      ],
-      
-      child: MaterialApp(
-        title: 'inScribe',
-        theme: darkTheme,
+    return ChangeNotifierProvider<SettingsState>(
+      create: (context) => _settingsState,
+      builder: (context, child) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => NoteBloc(_state),
+          ),
+          BlocProvider(
+            create: (context) => TopicBloc(_topicState),
+          )
+        ],
+        
+        child: Consumer<SettingsState>(
+          builder: (context, state, child) => MaterialApp(
+            title: 'inScribe',
+            theme: state.darkTheme ? darkTheme : lightTheme,
 
-        initialRoute: '/',
-        onGenerateRoute: RouteGenerator.generateRoute,
+            initialRoute: '/',
+            onGenerateRoute: RouteGenerator.generateRoute,
+          ),
+        ),
       ),
     );
   }
