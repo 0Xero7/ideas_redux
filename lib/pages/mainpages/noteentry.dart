@@ -44,45 +44,126 @@ class _NoteEntry extends State<NoteEntry> {
     else BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(widget.oldModel, widget.model) );
   }
 
-  List<Widget> _createNonReorderList() {
+  Widget _buildNonReorderList() {
     List<Widget> res = List<Widget>();
 
     for (var i in widget.model.data) {
       switch (i.runtimeType) {
         case TextDataModel:
-          res.add(Container(
-            key: UniqueKey(),
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-                  child: widget.entryMode == NoteEntryMode.ReorderMode ? Icon(Icons.drag_handle) : Container(height: 24,),
-                ),
+          res.add(
+            Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.startToEnd,
+              onDismissed: (direction) {
+                setState(() {
+                  widget.model.data.remove(i);
+                });
+              },
 
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: TextField(
-                      controller: TextEditingController(text: (i as TextDataModel).data),
-                      onChanged: (s) => (i as TextDataModel).data = s,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Note",
-                        isDense: true
-                      ),
-                      style: Theme.of(context).textTheme.subtitle1,
-                      maxLines: null,
+              background: Container(
+                color: Colors.red.shade100,
+                child: Row(
+                  children: [
+                    Icon(Icons.delete),
+                    Text('Delete')
+                  ],
+                ),
+              ),
+
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 13),
+                  child: TextField(
+                    controller: TextEditingController(text: (i as TextDataModel).data),
+                    onChanged: (s) => (i as TextDataModel).data = s,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Note",
+                      isDense: true
                     ),
+                    style: Theme.of(context).textTheme.subtitle1,
+                    maxLines: null,
                   ),
-                )
-              ],
-            ),
-          )
-        );
-        break;
+                ),
+              ),
+            )
+          );
+          break;
 
         case ChecklistModel:
-          res.add(Container(
+          res.add(
+            Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.startToEnd,
+              background: Container(
+                color: Colors.red.shade100,
+                child: Row(
+                  children: [
+                    Icon(Icons.delete),
+                    Text('Delete')
+                  ],
+                ),
+              ),
+              onDismissed: (direction) => setState(() => widget.model.data.remove(i)),
+              child: Container(
+                key: UniqueKey(),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10, left: 2),
+                  child: Checklist(i as ChecklistModel)
+                ),
+              ),
+            )
+          );
+          break;
+      }
+    }
+
+    return ListView(
+      children: res,
+    );
+  }
+
+  Widget _buildReorderableList(BuildContext context) {
+    List<Widget> res = List<Widget>();
+
+    for (var i in widget.model.data) {
+      switch (i.runtimeType) {
+        case TextDataModel:
+          res.add(
+            Container(
+              key: UniqueKey(),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
+                    child: widget.entryMode == NoteEntryMode.ReorderMode ? Icon(Icons.drag_handle) : Container(height: 24,),
+                  ),
+
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: TextField(
+                        controller: TextEditingController(text: (i as TextDataModel).data),
+                        onChanged: (s) => (i as TextDataModel).data = s,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Note",
+                          isDense: true
+                        ),
+                        style: Theme.of(context).textTheme.subtitle1,
+                        maxLines: null,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          );
+          break;
+
+        case ChecklistModel:
+          res.add(
+            Container(
               key: UniqueKey(),
               child: Row(
                 children: [
@@ -105,7 +186,22 @@ class _NoteEntry extends State<NoteEntry> {
       }
     }
 
-    return res;
+    return ReorderableListView(
+      onReorder: (oldIndex, newIndex) {
+        print(oldIndex.toString() + "," + newIndex.toString());
+
+        if (oldIndex == newIndex) return;
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex >= widget.model.data.length) newIndex = widget.model.data.length - 1;
+
+        setState(() {
+          var _temp = widget.model.data[oldIndex];
+          widget.model.data[oldIndex] = widget.model.data[newIndex];
+          widget.model.data[newIndex] = _temp;
+        });
+      },
+      children: res,
+    );
   }
 
   Widget _buildTopicButton(BuildContext context) {
@@ -310,9 +406,11 @@ class _NoteEntry extends State<NoteEntry> {
             right: 0,
             bottom: 0,
             
-            child: ListView(
-              padding: EdgeInsets.only(bottom: 35),
-              children: _createNonReorderList(),
+            child: widget.entryMode == NoteEntryMode.ReorderMode ? _buildReorderableList(context) : _buildNonReorderList(),
+            
+            // ListView(
+            //   padding: EdgeInsets.only(bottom: 35),
+            //   children: _createNonReorderList(),
               
               
               // [
@@ -364,7 +462,7 @@ class _NoteEntry extends State<NoteEntry> {
               //   // ),
 
               // ],
-            ),
+            //),
           ),
 
           Positioned(
@@ -375,7 +473,13 @@ class _NoteEntry extends State<NoteEntry> {
             child: Container(
               height: 40,
               color: Theme.of(context).cardColor.withAlpha(200),
+            )
+          ),
 
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
@@ -397,29 +501,21 @@ class _NoteEntry extends State<NoteEntry> {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: MaterialButton(
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            widget.model.data.add(
-                              ChecklistModel.emptyWithEntry()
-                            );
-                          });
-                        },
-                        child: Icon(Icons.list),
-                      ),
-                    ),
+                    IconButton(
+                      icon: Icon(Icons.list),
+                      onPressed: () {
+                        setState(() {
+                          widget.model.data.add(
+                            ChecklistModel.emptyWithEntry()
+                          );
+                        });
+                      },
+                    )
                   ],
                 ),
               ),
             ),
-          )
+          
         ],
       ),
     ); 

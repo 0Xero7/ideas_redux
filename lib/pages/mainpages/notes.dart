@@ -7,6 +7,7 @@ import 'package:ideas_redux/bloc_events/note_event.dart';
 import 'package:ideas_redux/bloc_events/topic_event.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 import 'package:ideas_redux/models/notemodel.dart';
+import 'package:ideas_redux/pages/searchnotes.dart';
 import 'package:ideas_redux/state/note_state.dart';
 import 'package:ideas_redux/state/selection_state.dart';
 import 'package:ideas_redux/state/topic_state.dart';
@@ -29,6 +30,8 @@ class Notes extends StatefulWidget {
 
 class _Notes extends State<Notes> with TickerProviderStateMixin {
   TabController _tabController;
+  bool searching = false;
+
   @override
   void initState() {
     super.initState();
@@ -115,7 +118,98 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
         ],
       ),
     );
-  } 
+  }
+
+  Widget _buildSearchIcon(context) {
+    final SelectionState _state = Provider.of<SelectionState>(context);
+    
+    return AnimatedPosOp(
+      hidden: _state.selecting,
+      opacity: _state.selecting ? 0 : 1,
+      top: 25,
+      right: _state.selecting ? 0 : 15,
+
+      duration: Duration(milliseconds: 100),
+      curve: Curves.easeOutCubic,
+
+      child: RoundButton(
+        child: Hero(
+          tag: 'search_icon',
+          child: Icon(Icons.search)
+        ),
+        onPressed: () {
+          setState(() => searching = !searching);
+        },
+      )
+    );
+  }
+
+  String _searchString = "";
+  Stream<List<int>> _getFilteredTopicNotes(BuildContext context, NoteState state, int topicId, String searchString) async* {
+    var res = new List<int>();
+
+    if (state.notesInCategory[topicId] == null) yield [];
+    else {
+      for (var modelId in state.notesInCategory[topicId]) {
+        if (state.noteRef[modelId].title.toLowerCase().contains(searchString)) {
+          res.add(modelId);
+          yield res;
+        }
+      }
+    }
+
+    yield res;
+  }
+
+  Widget _buildSearchBox(context) {
+    final TextEditingController controller = TextEditingController();
+    final double width = MediaQuery.of(context).size.width / 2;
+
+    return AnimatedPosOp(
+      top: 85,
+      left: searching ? 10 : width,
+      right: 10,
+
+      opacity: searching ? 1 : 0,
+      hidden: !searching,
+
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+
+      child: Stack(
+        children: [
+          Positioned(
+            child: Container(
+              height: searching ? 40 : 0,
+              decoration: BoxDecoration(
+                color: Theme.of(context).canvasColor,
+                borderRadius: BorderRadius.circular(8)
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: 9,
+            left: 8,
+            right: 8,
+
+            child: TextField(
+              enabled: searching,
+              onChanged: (value) => setState(() => this._searchString = value),
+              autofocus: true,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                isCollapsed: true,
+                hintText: 'Search'
+              ),
+              style: Theme.of(context).textTheme.subtitle1,
+            )
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,8 +229,12 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
               left: 0,
               right: 0,
 
-              child: Container(
-                height: 123,
+              child: AnimatedContainer(
+                height: searching ? 173 : 123,
+
+                duration: Duration(milliseconds: 150),
+                curve: Curves.easeOutCubic,
+
                 decoration: BoxDecoration(
                   color: Theme.of(context).bottomAppBarColor,
                   boxShadow: [
@@ -153,13 +251,18 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
             _buildHeader(context),
             _buildSelectionMenuLeft(context),
             _buildSelectionMenuRight(context),
+            _buildSearchIcon(context),
+            _buildSearchBox(context),
 
 
-            Positioned(
-              top: 80,
+            AnimatedPositioned(
+              top: searching ? 130 : 80,
               left: 0,
               right: 0,
               bottom: 0,
+
+              duration: Duration(milliseconds: 150),
+              curve: Curves.easeOutCubic,
 
               child: BlocConsumer<TopicBloc, TopicState>(
                 listener: (context, state) {
@@ -212,15 +315,18 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
     BlocConsumer<NoteBloc, NoteState>(
       listener: (_, __) {},
       builder: (cxt, noteList) {
-        return StaggeredGridView.countBuilder(
-          padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
+        return StreamBuilder(
+          stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
+          builder: (context, snapshot) => StaggeredGridView.countBuilder(
+            padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
 
-          itemCount: noteList.notesInCategory[topicKey]?.length ?? 0,
-          staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-          itemBuilder: (_, index) => NoteCard( noteList.noteRef[noteList.notesInCategory[topicKey][index]] )
+            itemCount: snapshot.data?.length ?? 0,
+            staggeredTileBuilder: (index) => StaggeredTile.fit(1),
+            itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
+          ),
         );
       }
     );

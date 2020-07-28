@@ -10,6 +10,7 @@ import 'package:ideas_redux/pages/mainpages/settings.dart';
 import 'package:ideas_redux/pages/mainpages/topics.dart';
 import 'package:ideas_redux/testdata/testnotes.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
+import 'package:ideas_redux/widgets/text_dialog.dart';
 
 class StackedPage extends StatefulWidget {
   @override
@@ -69,23 +70,26 @@ class _StackedPageState extends State<StackedPage> {
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
       //color: Colors.white,
-
       child: Container(
+        height: 55,
+        padding: EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           mainAxisAlignment: currentIndex <= 1 ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            Row(
-              children: [
-                FlatButton(child: Icon(Icons.home), onPressed: () { changeAppState(AppState.atNotes); },),
-                FlatButton(child: Icon(Icons.category), onPressed: () { changeAppState(AppState.atTopics); },),
-              ],
-            ),
-            Row(
-              children: [
-                FlatButton(child: Icon(Icons.archive), onPressed: () { changeAppState(AppState.atArchived); },),
-                FlatButton(child: Icon(Icons.settings), onPressed: () { changeAppState(AppState.atSettings); },),
-              ],
-            ),
+            IconButton(icon: Icon(Icons.home,
+              color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            ), onPressed: () { changeAppState(AppState.atNotes); },),
+            IconButton(icon: Icon(Icons.category,
+              color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            ), onPressed: () { changeAppState(AppState.atTopics); },),
+            SizedBox.shrink(),
+            IconButton(icon: Icon(Icons.archive,
+              color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            ), onPressed: () { changeAppState(AppState.atArchived); },),
+            IconButton(icon: Icon(Icons.settings,
+              color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            ), onPressed: () { changeAppState(AppState.atSettings); },),
           ],
         ),
       ),
@@ -110,31 +114,7 @@ class _StackedPageState extends State<StackedPage> {
                 break;
               case 1:
                 changeAppState(AppState.addingTopic);
-                var res = await showDialog(
-                  context: context,
-                  builder: (ctx) {
-                    TextEditingController controller = TextEditingController();
-
-                    return WillPopScope(
-                      onWillPop: () async { changeAppState(AppState.atTopics); return true; },
-                      child: AlertDialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: controller,
-                            )
-                          ],
-                        ),
-                        actions: [
-                          FlatButton(child: Text('Cancel', style: Theme.of(context).textTheme.subtitle1,), textColor: Colors.red,  onPressed: () => Navigator.pop(context, null),),
-                          FlatButton(child: Text('Save', style: Theme.of(context).textTheme.subtitle1,), onPressed: () => Navigator.pop(context, controller.text),),
-                        ],
-                      ),
-                    );
-                  }
-                );
+                var res = await showTextDialog(context, () { changeAppState(AppState.atTopics); });
 
                 if (res != null)
                   BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res) ) );

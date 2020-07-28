@@ -24,38 +24,35 @@ class _Checklist extends State<Checklist> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        ListView.builder(
-          shrinkWrap: true,
-          
-          itemCount: widget.model.data.length,
-
-          itemBuilder: (_, index) => Row(
-            children: [
-              Expanded(
-                flex: 0,
-                child: Checkbox(
-                  onChanged: (e) { setState(() => widget.model.data[index].checked = e); },
-                  value: widget.model.data[index].checked,
-                  visualDensity: VisualDensity.compact,                            
-                ),
-              ),
-              Expanded(
-                child: TextField(
-                  key: UniqueKey(),
-                  controller: TextEditingController(text: widget.model.data[index].data),
-                  onChanged: (e) => widget.model.data[index].data = e,
-
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Note",
-                    isDense: true
+        Column(
+            children: List.generate(widget.model.data.length, (index) => Row(
+              children: [
+                Expanded(
+                  flex: 0,
+                  child: Checkbox(
+                    onChanged: (e) { setState(() => widget.model.data[index].checked = e); },
+                    value: widget.model.data[index].checked,
+                    visualDensity: VisualDensity.compact,                            
                   ),
-                  style: Theme.of(context).textTheme.subtitle1,
-                  maxLines: null,
                 ),
-              ),
-            ],
-          ),
+                Expanded(
+                  child: TextField(
+                    key: UniqueKey(),
+                    controller: TextEditingController(text: widget.model.data[index].data),
+                    onChanged: (e) => widget.model.data[index].data = e,
+
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Note",
+                      isDense: true
+                    ),
+                    style: Theme.of(context).textTheme.subtitle1,
+                    maxLines: null,
+                  ),
+                ),
+              ]
+            )
+          )
         ),
 
         MaterialButton(

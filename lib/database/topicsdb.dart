@@ -14,7 +14,10 @@ class TopicsDB {
 
     // await Hive.deleteBoxFromDisk("topics");
     _topicBox = await Hive.openBox<String>("topics");
-
+    if (!_topicBox.containsKey(1)) {
+      var _topic = TopicModel(1, 'Other');
+      await updateTopic(_topic);
+    }
   }
 
   static Future<List<TopicModel>> loadTopics() async {

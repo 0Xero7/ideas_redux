@@ -202,6 +202,22 @@ class _Topics extends State<Topics> {
     );
   } 
 
+  Stream<List<int>> someStream(BuildContext context, String searchString) async* {
+    List<int> res = List<int>();
+    final state = BlocProvider.of<TopicBloc>(context).state;
+
+    for (var i in state.topics.values) {
+      if (i.topicName.toLowerCase().contains(searchString)) {
+        res.add(i.id);
+        yield res;
+      }
+    }
+
+    yield res;
+  }
+
+  String s = '';
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -238,10 +254,10 @@ class _Topics extends State<Topics> {
                 child: Container(
                   height: 40,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: searchSelected ? Theme.of(context).buttonColor : Colors.transparent,
-                      width: searchSelected ? 0.5 : 0
-                    ),
+                    // border: Border.all(
+                    //   color: searchSelected ? Theme.of(context).buttonColor : Colors.transparent,
+                    //   width: searchSelected ? 0.5 : 0
+                    // ),
                     color: Theme.of(context).canvasColor,
                     borderRadius: BorderRadius.circular(8)
                   ),
@@ -267,6 +283,7 @@ class _Topics extends State<Topics> {
                     isCollapsed: true,
                     hintText: 'Search'
                   ),
+                  onChanged: (str) => setState(() => this.s = str),
                   style: Theme.of(context).textTheme.subtitle1,
                 )
               ),
@@ -281,7 +298,40 @@ class _Topics extends State<Topics> {
                   builder: (context, state) { 
                     final _selection = Provider.of<SelectionState>(context);
                     
-                    return ListView.separated(
+                    return StreamBuilder(
+                      stream: someStream(context, s),
+                      builder: (context, snapshot) => ListView.separated(
+                        separatorBuilder: (context, index) => Divider(
+                          height: 0, thickness: 0,
+                          indent: 10,
+                          endIndent: 10,
+                        ),
+
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (_, id) => MaterialButton(
+                          padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
+                          
+                          onPressed: () { _selection.toggleSelection(snapshot.data[id]); },
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
+                                const SizedBox(width: 5),
+                                Text( 
+                                  state.topics[snapshot.data[id]].topicName ?? "", 
+                                  textAlign: TextAlign.start,
+                                  style: Theme.of(context).textTheme.subtitle1
+                                ),
+                              ],
+                            )
+                          ),
+                        )
+                      ),
+                    );
+                    
+                    ListView.separated(
                       itemCount: state.topics.length,
                       separatorBuilder: (context, index) => Divider(
                         height: 0, thickness: 1,
