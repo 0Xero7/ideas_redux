@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
 import 'package:ideas_redux/bloc_events/topic_event.dart';
@@ -11,6 +12,7 @@ import 'package:ideas_redux/widgets/back.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
 import 'package:ideas_redux/widgets/visual/roundbutton.dart';
 import 'package:provider/provider.dart';
+import 'package:random_color/random_color.dart';
 
 class Topics extends StatefulWidget {
   @override
@@ -300,7 +302,65 @@ class _Topics extends State<Topics> {
                     
                     return StreamBuilder(
                       stream: someStream(context, s),
-                      builder: (context, snapshot) => ListView.separated(
+                      builder: (context, snapshot) {
+                        return ReorderableList(
+                          onReorder: (draggedItem, newPosition) { 
+                            var _old = draggedItem as ValueKey;
+                            var _new = draggedItem as ValueKey;
+                            // print(_old.toString() + "," + _new.toString());
+                            return true;
+                          },
+                          child: CustomScrollView(
+                            slivers: [
+                              SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, id) {
+                                    return ReorderableItem(
+                                      key: ValueKey(id),
+                                      childBuilder: (context, reorder_state) => MaterialButton(
+                                        padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
+                                        
+                                        onPressed: () { _selection.toggleSelection(snapshot.data[id]); },
+                                        child: Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
+                                              const SizedBox(width: 5),
+                                              Text( 
+                                                state.topics[snapshot.data[id]].topicName ?? "", 
+                                                textAlign: TextAlign.start,
+                                                style: Theme.of(context).textTheme.subtitle1
+                                              ),
+
+                                              // TODO: Implement reorder later.
+                                              // %%%% IT'S HARD %%%%
+                                              // Expanded(
+                                              //   child: Align(
+                                              //     alignment: Alignment.centerRight,
+                                              //     child: ReorderableListener(
+                                              //       child: Container(
+                                              //         child: Icon(Icons.drag_handle),
+                                              //       ),
+                                              //     ),
+                                              //   ),
+                                              // )
+                                            ],
+                                          )
+                                        ),
+                                      )
+                                    );
+                                  },
+                                  childCount: snapshot.data.length,
+                                ),
+                              )
+                            ],
+                          )
+                        );
+                        
+                        
+                        return ListView.separated(
                         separatorBuilder: (context, index) => Divider(
                           height: 0, thickness: 0,
                           indent: 10,
@@ -328,36 +388,8 @@ class _Topics extends State<Topics> {
                             )
                           ),
                         )
-                      ),
-                    );
-                    
-                    ListView.separated(
-                      itemCount: state.topics.length,
-                      separatorBuilder: (context, index) => Divider(
-                        height: 0, thickness: 1,
-                        indent: 10,
-                        endIndent: 10,
-                      ),
-                      itemBuilder: (_, index) => MaterialButton(
-                        padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
-                        
-                        onPressed: () { _selection.toggleSelection(state.topics.values.elementAt(index).id); },
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon( _selection.contains(state.topics.values.elementAt(index).id) ? Icons.check_box : Icons.check_box_outline_blank),
-                              const SizedBox(width: 5),
-                              Text( 
-                                state.topics.values.elementAt(index).topicName, 
-                                textAlign: TextAlign.start,
-                                style: Theme.of(context).textTheme.subtitle1
-                              ),
-                            ],
-                          )
-                        ),
-                      )
+                      );
+                      },
                     );
                   }
                 )

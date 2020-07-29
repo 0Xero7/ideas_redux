@@ -407,62 +407,6 @@ class _NoteEntry extends State<NoteEntry> {
             bottom: 0,
             
             child: widget.entryMode == NoteEntryMode.ReorderMode ? _buildReorderableList(context) : _buildNonReorderList(),
-            
-            // ListView(
-            //   padding: EdgeInsets.only(bottom: 35),
-            //   children: _createNonReorderList(),
-              
-              
-              // [
-              //   Container(
-              //     key: UniqueKey(),
-              //     child: Row(
-              //       children: [
-              //         Padding(
-              //           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-              //           child: widget.entryMode == NoteEntryMode.ReorderMode ? Icon(Icons.drag_handle) : Container(height: 24,),
-              //         ),
-
-              //         Expanded(
-              //           child: Padding(
-              //             padding: const EdgeInsets.only(right: 10),
-              //             child: TextField(
-              //               decoration: InputDecoration(
-              //                 border: InputBorder.none,
-              //                 hintText: "Note",
-              //                 isDense: true
-              //               ),
-              //               style: Theme.of(context).textTheme.subtitle1,
-              //               maxLines: null,
-              //             ),
-              //           ),
-              //         )
-              //       ],
-              //     ),
-              //   ),
-
-              //   // Container(
-              //   //   key: UniqueKey(),
-
-              //   //   child: Row(
-              //   //     children: [
-              //   //       Padding(
-              //   //         padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10),
-              //   //         child: widget.entryMode == NoteEntryMode.ReorderMode ? Icon(Icons.drag_handle) : Container(height: 24,),
-              //   //       ),
-
-              //   //       Expanded(
-              //   //         child: Padding(
-              //   //           padding: const EdgeInsets.only(right: 10),
-              //   //           child: Checklist()
-              //   //         )
-              //   //       )
-              //   //     ],
-              //   //   ),
-              //   // ),
-
-              // ],
-            //),
           ),
 
           Positioned(
@@ -471,50 +415,79 @@ class _NoteEntry extends State<NoteEntry> {
             right: 0,
 
             child: Container(
-              height: 40,
-              color: Theme.of(context).cardColor.withAlpha(200),
+              height: 50,
+              color: Theme.of(context).cardColor.withAlpha(10),
+
+              child: Row(
+                children: [
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: IconButton(
+                      icon: Icon(Icons.text_format),
+                      onPressed: () {
+                        setState(() {
+                          widget.model.data.add(TextDataModel(''));
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  IconButton(
+                    icon: Icon(Icons.list),
+                    onPressed: () {
+                      setState(() {
+                        widget.model.data.add(
+                          ChecklistModel.emptyWithEntry()
+                        );
+                      });
+                    },
+                  )
+                ],
+              ),
             )
           ),
 
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: MaterialButton(
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            widget.model.data.add(TextDataModel(''));
-                          });
-                        },
-                        child: Icon(Icons.text_format),
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    IconButton(
-                      icon: Icon(Icons.list),
-                      onPressed: () {
-                        setState(() {
-                          widget.model.data.add(
-                            ChecklistModel.emptyWithEntry()
-                          );
-                        });
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
+          // Positioned(
+          //   bottom: 0,
+          //   left: 0,
+          //   right: 0,
+          //     child: Padding(
+          //       padding: const EdgeInsets.symmetric(horizontal: 10),
+          //       child: Row(
+          //         children: [
+          //           SizedBox(
+          //             width: 40,
+          //             height: 40,
+          //             child: MaterialButton(
+          //               padding: EdgeInsets.zero,
+          //               shape: RoundedRectangleBorder(
+          //                 borderRadius: BorderRadius.circular(20)
+          //               ),
+          //               onPressed: () {
+          //                 setState(() {
+          //                   widget.model.data.add(TextDataModel(''));
+          //                 });
+          //               },
+          //               child: Icon(Icons.text_format),
+          //             ),
+          //           ),
+          //           const SizedBox(width: 5),
+          //           IconButton(
+          //             icon: Icon(Icons.list),
+          //             onPressed: () {
+          //               setState(() {
+          //                 widget.model.data.add(
+          //                   ChecklistModel.emptyWithEntry()
+          //                 );
+          //               });
+          //             },
+          //           )
+          //         ],
+          //       ),
+          //     ),
+          //   ),
           
         ],
       ),

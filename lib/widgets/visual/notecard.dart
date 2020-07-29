@@ -87,7 +87,7 @@ class NoteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${data.title} ${data.id}', style: Theme.of(context).textTheme.headline6),
+                Text('${data.title}', style: Theme.of(context).textTheme.headline6),
                 const SizedBox(height: 5),
 
                 Column(

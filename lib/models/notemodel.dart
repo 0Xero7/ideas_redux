@@ -8,6 +8,7 @@ class NoteModel {
   String title;
   List<BaseDataModel> data;
   bool isArchived;
+  bool protected;
 
   NoteModel() { data = List<BaseDataModel>(); title = ""; }
 

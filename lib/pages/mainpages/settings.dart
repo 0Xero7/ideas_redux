@@ -63,7 +63,40 @@ class _SettingsPage extends State<SettingsPage> {
                     },
                     value: state.darkTheme,
                     title: Text('Dark Theme'),
-                  )
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Icon(Icons.info_outline),
+                        const SizedBox(width: 5,),
+                        Text('About'),
+                      ],
+                    ),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    subtitle: Text('Like the app?', style: Theme.of(context).textTheme.subtitle2,),
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Icon(Icons.play_arrow),
+                        const SizedBox(width: 5,),
+                        Text('Rate on Google Play!'),
+                      ],
+                    ),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Icon(Icons.store),
+                        const SizedBox(width: 5,),
+                        Text('Buy me a coffee!'),
+                      ],
+                    ),
+                    onTap: () {},
+                  ),
                 ],
               ),
             )
