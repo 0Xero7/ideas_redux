@@ -64,6 +64,10 @@ class _SettingsPage extends State<SettingsPage> {
                     value: state.darkTheme,
                     title: Text('Dark Theme'),
                   ),
+                  Divider(
+                    indent: 10,
+                    endIndent: 10,
+                  ),
                   ListTile(
                     title: Row(
                       children: [
@@ -74,9 +78,13 @@ class _SettingsPage extends State<SettingsPage> {
                     ),
                     onTap: () {},
                   ),
-                  ListTile(
-                    subtitle: Text('Like the app?', style: Theme.of(context).textTheme.subtitle2,),
+                  Divider(
+                    indent: 10,
+                    endIndent: 10,
                   ),
+                  // ListTile(
+                  //   subtitle: Text('Like the app?', style: Theme.of(context).textTheme.subtitle2,),
+                  // ),
                   ListTile(
                     title: Row(
                       children: [

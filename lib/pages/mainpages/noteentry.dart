@@ -443,6 +443,15 @@ class _NoteEntry extends State<NoteEntry> {
                         );
                       });
                     },
+                  ),
+                  const SizedBox(width: 5),
+                  IconButton(
+                    icon: Icon( widget.model.protected ? Icons.lock_open : Icons.lock_outline ),
+                    onPressed: () {
+                      setState(() {
+                        widget.model.protected = !widget.model.protected;
+                      });
+                    },
                   )
                 ],
               ),

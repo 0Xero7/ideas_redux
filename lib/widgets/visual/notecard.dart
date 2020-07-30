@@ -3,15 +3,35 @@ import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ideas_redux/helpers/note_entry_decrypt_helper.dart';
 import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 import 'package:ideas_redux/models/notemodel.dart';
 import 'package:ideas_redux/state/selection_state.dart';
+import 'package:local_auth/auth_strings.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 
 class NoteCard extends StatelessWidget {
   final NoteModel data;
   NoteCard(this.data);
+
+  List<Widget> buildProtectedThumbnail(context) => [
+    const SizedBox(height: 15),
+    Opacity(
+      child: Column(
+        children: [
+          Icon(Icons.lock),
+          const SizedBox(height: 4),
+          Text(
+            'This note is protected',
+            textAlign: TextAlign.center,
+          )
+        ],
+      ),
+      opacity: 0.6,
+    ),
+  ];
 
   // hard limit of 512 words
   List<Widget> buildThumbnail(context) {
@@ -73,8 +93,27 @@ class NoteCard extends StatelessWidget {
           )
         ),
         child: InkWell(
-          onTap: () {
-            if (!_state.selecting) { Navigator.pushNamed(context, '/editentry', arguments: data); return; }
+          onTap: () async {            
+            if (!_state.selecting) {
+              bool authed = false;
+
+              if (data.protected) {
+                var _local = LocalAuthentication();
+                authed = await _local.authenticateWithBiometrics(
+                  localizedReason: 'Unlock with a valid fingerprint',
+                  androidAuthStrings: AndroidAuthMessages(
+                    fingerprintHint: 'This note is protected',
+                  )
+                );
+              }
+              
+              // decode encryptedData if note is protected
+              if (authed || !data.protected) 
+                await loadNoteEntryPage(context, data, '');
+
+                // Navigator.pushNamed(context, '/editentry', arguments: data); 
+              return; 
+            }
 
             _state.toggleSelection(data.id);
           },
@@ -85,13 +124,13 @@ class NoteCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: data.protected ? CrossAxisAlignment.center : CrossAxisAlignment.start,
               children: [
                 Text('${data.title}', style: Theme.of(context).textTheme.headline6),
-                const SizedBox(height: 5),
+                const SizedBox(height: 5), 
 
                 Column(
-                  children: buildThumbnail(context),
+                  children: data.protected ? buildProtectedThumbnail(context) : buildThumbnail(context),
                 )
               ],
             ),

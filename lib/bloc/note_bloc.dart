@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
+import 'package:ideas_redux/crypto/crypto.dart';
 import 'package:ideas_redux/database/notesdb.dart';
+import 'package:ideas_redux/helpers/crypto_helper.dart';
 import 'package:ideas_redux/models/notemodel.dart';
 import 'package:ideas_redux/state/note_state.dart';
 
@@ -42,6 +46,44 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         break;
 
       case EventType.update:
+        
+        final secureStorage = FlutterSecureStorage();
+        // is note protected? if so, encrypt it, and remove the data part
+        if (event.newNote.protected) {
+          var json = jsonEncode(event.newNote.getDataAsJson());
+          event.newNote.data.clear();
+          
+          String _key, _iv;
+          // this means that the model was changed from unprotected to protected
+          if (!event.oldNote.protected) {
+            
+            // create new key and iv
+            _key = randomString(32);
+            _iv = randomString(16);
+
+            // write key and iv to keystore
+            await secureStorage.write(key: '${event.newNote.randomId}_key', value: _key);
+            await secureStorage.write(key: '${event.newNote.randomId}_iv', value: _iv);
+
+            print(await secureStorage.read(key: '${event.newNote.randomId}_key'));
+            print(await secureStorage.read(key: '${event.newNote.randomId}_iv'));
+          } else { // this means that we are re-writing an already protected note
+            // get key and iv from keystore
+            _key = await secureStorage.read(key: '${event.newNote.randomId}_key');
+            _iv  = await secureStorage.read(key: '${event.newNote.randomId}_iv');
+          }
+
+          event.newNote.encryptedData = encryptAES(json, _key, _iv);
+        } else {
+          if (event.oldNote.protected) {
+            // changed from protected to unprotected
+            // delete existing key and iv
+
+            await secureStorage.delete(key: '${event.newNote.randomId}_key');
+            await secureStorage.delete(key: '${event.newNote.randomId}_iv');
+          }
+        }
+
         await NotesDB.updateNote(event.newNote);
 
         NoteState newState = NoteState.from(state);

@@ -37,6 +37,9 @@ dependencies:
   shared_preferences: ^0.5.8
   flutter_reorderable_list: ^0.1.4
   random_color: ^1.0.5
+  local_auth: ^0.6.2+3
+  encrypt: ^4.0.2
+  flutter_secure_storage: ^3.3.3
 
 dev_dependencies:
   flutter_test:
