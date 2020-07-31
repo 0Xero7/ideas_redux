@@ -36,14 +36,14 @@ class AboutPage extends StatelessWidget {
           ),
 
           Positioned(
-            top: 100,
+            top: 130,
             left: 0,
             right: 0,
 
             child: Center(
               child: Text(
                 'inScribe',
-                style: Theme.of(context).textTheme.headline2,
+                style: Theme.of(context).textTheme.headline4,
               )
             ),
           ),

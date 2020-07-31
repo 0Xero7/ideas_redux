@@ -72,43 +72,69 @@ class _StackedPageState extends State<StackedPage> {
       //color: Colors.white,
       child: Container(
         height: 55,
-        padding: EdgeInsets.symmetric( horizontal: currentIndex <= 1 ? 20 : 0 ),
+        // padding: EdgeInsets.symmetric( horizontal: 20 ),
         child: Row(
           mainAxisAlignment: currentIndex <= 1 ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: IconButton(icon: Icon(Icons.home,
+                    child: FlatButton(child: Icon(Icons.home,
                       color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-                    ), onPressed: () { changeAppState(AppState.atNotes); },),
+                    ), onPressed: () { changeAppState(AppState.atNotes); }, highlightColor: Colors.transparent),
+                  ),
+                  Align(
+                    child: Container(
+                      width: 1,
+                      height: 30,
+                      color: Theme.of(context).dividerColor.withAlpha(10),
+                    ),
                   ),
                   Expanded(
-                    child: IconButton(icon: Icon(Icons.category,
+                    child: FlatButton(child: Icon(Icons.category,
                       color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-                    ), onPressed: () { changeAppState(AppState.atTopics); },),
+                    ), onPressed: () { changeAppState(AppState.atTopics); }, highlightColor: Colors.transparent),
                   ),
                 ],
               ),
             ),
             AnimatedContainer(
-              width:  currentIndex <= 1 ? 40 : 0,
-              duration: Duration(milliseconds: 200),
+              width:  currentIndex <= 1 ? 60 : 1,
+              duration: Duration(milliseconds: 100),
+              curve: Curves.easeOutCubic,
+              child: Center(
+                child: Align(
+                  child: Container(
+                    width: 1,
+                    height: 30,
+                    color: Theme.of(context).dividerColor.withAlpha( currentIndex <= 1 ? 0 : 10 ),
+                  ),
+                ),
+              ),
             ),
             Expanded(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: IconButton(icon: Icon(Icons.archive,
+                    child: FlatButton(child: Icon(Icons.archive,
                       color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-                    ), onPressed: () { changeAppState(AppState.atArchived); },),
+                    ), onPressed: () { changeAppState(AppState.atArchived); }, highlightColor: Colors.transparent),
+                  ),
+                  Align(
+                    child: Container(
+                      width: 1,
+                      height: 30,
+                      color: Theme.of(context).dividerColor.withAlpha(10),
+                    ),
                   ),
                   Expanded(
-                    child: IconButton(icon: Icon(Icons.settings,
+                    child: FlatButton(child: Icon(Icons.settings,
                       color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-                    ), onPressed: () { changeAppState(AppState.atSettings); },),
+                    ), onPressed: () { changeAppState(AppState.atSettings); }, highlightColor: Colors.transparent),
                   ),
                 ],
               )
@@ -159,6 +185,24 @@ class _StackedPageState extends State<StackedPage> {
           },
         ) :
         null,
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(Icons.add),
+      //   onPressed: () async { 
+      //     switch (currentIndex) {
+      //       case 0:
+      //         final _state = BlocProvider.of<TopicBloc>(context).state.topics.keys.first;
+      //         Navigator.pushNamed(context, '/editentry', arguments: NoteModel.empty(_state)); 
+      //         break;
+      //       case 1:
+      //         changeAppState(AppState.addingTopic);
+      //         var res = await showTextDialog(context, () { changeAppState(AppState.atTopics); });
+
+      //         if (res != null)
+      //           BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res) ) );
+      //         break;
+      //     }
+      //   },
+      // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       body: SafeArea(

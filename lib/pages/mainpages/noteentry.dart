@@ -45,6 +45,7 @@ class _NoteEntry extends State<NoteEntry> {
   }
 
   Widget _buildNonReorderList() {
+    print("called");
     List<Widget> res = List<Widget>();
 
     for (var i in widget.model.data) {
@@ -119,6 +120,7 @@ class _NoteEntry extends State<NoteEntry> {
     }
 
     return ListView(
+      padding: EdgeInsets.only(bottom: 40),
       children: res,
     );
   }
@@ -419,6 +421,7 @@ class _NoteEntry extends State<NoteEntry> {
               color: Theme.of(context).cardColor.withAlpha(10),
 
               child: Row(
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   const SizedBox(width: 10),
                   SizedBox(
@@ -444,60 +447,113 @@ class _NoteEntry extends State<NoteEntry> {
                       });
                     },
                   ),
-                  const SizedBox(width: 5),
-                  IconButton(
-                    icon: Icon( widget.model.protected ? Icons.lock_open : Icons.lock_outline ),
-                    onPressed: () {
-                      setState(() {
-                        widget.model.protected = !widget.model.protected;
-                      });
-                    },
-                  )
                 ],
               ),
             )
           ),
 
-          // Positioned(
-          //   bottom: 0,
-          //   left: 0,
-          //   right: 0,
-          //     child: Padding(
-          //       padding: const EdgeInsets.symmetric(horizontal: 10),
-          //       child: Row(
-          //         children: [
-          //           SizedBox(
-          //             width: 40,
-          //             height: 40,
-          //             child: MaterialButton(
-          //               padding: EdgeInsets.zero,
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20)
-          //               ),
-          //               onPressed: () {
-          //                 setState(() {
-          //                   widget.model.data.add(TextDataModel(''));
-          //                 });
-          //               },
-          //               child: Icon(Icons.text_format),
-          //             ),
-          //           ),
-          //           const SizedBox(width: 5),
-          //           IconButton(
-          //             icon: Icon(Icons.list),
-          //             onPressed: () {
-          //               setState(() {
-          //                 widget.model.data.add(
-          //                   ChecklistModel.emptyWithEntry()
-          //                 );
-          //               });
-          //             },
-          //           )
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          
+          Positioned(
+            right: 0,
+            bottom: 0,
+
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [             
+                // IconButton(
+                //   icon: Icon( widget.model.protected ? Icons.lock_open : Icons.lock_outline ),
+                //   onPressed: () {
+                //     setState(() {
+                //       widget.model.protected = !widget.model.protected;
+                //     });
+                //   },
+                // ),
+                // IconButton(
+                //   icon: Icon(Icons.menu),
+                //   onPressed: () async {
+                //     double left = MediaQuery.of(context).size.width - 150;
+                //     double top = MediaQuery.of(context).size.height - 100;
+                //     await showMenu(
+                //       context: context, 
+                //       position: RelativeRect.fromLTRB(left, top, 20, 10),
+                //       items: [
+                //         PopupMenuItem(
+                //           child: Row(
+                //             crossAxisAlignment: CrossAxisAlignment.center,
+                //             children: [
+                //               Icon(Icons.lock_outline, size: 20,),
+                //               const SizedBox(width: 10,),
+                //               Text('Protect')
+                //             ],
+                //           ),
+                //         )
+                //       ]
+                //     );
+                //   },
+                // ),
+                PopupMenuButton(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'protect':
+                        setState(() {
+                          widget.model.protected = !widget.model.protected;
+                        });
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: Row(
+                        children: [
+                          Icon(widget.model.protected ? Icons.lock_open : Icons.lock_outline, size: 18,),
+                          const SizedBox(width: 5,),
+                          Padding(
+                            padding: EdgeInsets.only(top: 2),
+                            child: Text(
+                              !widget.model.protected ? 
+                                'Protect' : 'Remove protection',
+                            )
+                          )
+                        ],
+                      ),
+                      value: 'protect',
+                    ),
+                    PopupMenuItem(
+                      child: Row(
+                        children: [
+                          Icon(Icons.archive, size: 18,),
+                          const SizedBox(width: 5,),
+                          Padding(
+                            padding: EdgeInsets.only(top: 2),
+                            child: Text(
+                              'Archive',
+                            )
+                          )
+                        ],
+                      ),
+                      value: 'archived',
+                    ),
+                    PopupMenuItem(
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, size: 18,),
+                          const SizedBox(width: 5,),
+                          Padding(
+                            padding: EdgeInsets.only(top: 2),
+                            child: Text(
+                              'Delete',
+                            )
+                          )
+                        ],
+                      ),
+                      value: 'delete',
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 5),   
+              ],
+            ),
+          )          
         ],
       ),
     ); 
