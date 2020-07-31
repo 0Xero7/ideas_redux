@@ -7,6 +7,7 @@ ThemeData lightTheme = ThemeData.light().copyWith(
 );
 ThemeData darkTheme  = ThemeData.dark(). copyWith(
   textTheme:  GoogleFonts.getTextTheme('Nunito').copyWith(
+    headline2: GoogleFonts.getFont('Nunito', color: Colors.white70),
     headline4: GoogleFonts.getFont('Nunito', color: Colors.white70),
     headline6: GoogleFonts.getFont('Nunito', color: Colors.white70),
     subtitle1: GoogleFonts.getFont('Nunito', color: Colors.white60),

@@ -76,7 +76,7 @@ class _SettingsPage extends State<SettingsPage> {
                         Text('About'),
                       ],
                     ),
-                    onTap: () {},
+                    onTap: () => Navigator.pushNamed(context, '/about') ,
                   ),
                   Divider(
                     indent: 10,

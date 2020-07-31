@@ -72,24 +72,60 @@ class _StackedPageState extends State<StackedPage> {
       //color: Colors.white,
       child: Container(
         height: 55,
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric( horizontal: currentIndex <= 1 ? 20 : 0 ),
         child: Row(
           mainAxisAlignment: currentIndex <= 1 ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
           children: [
-            IconButton(icon: Icon(Icons.home,
-              color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-            ), onPressed: () { changeAppState(AppState.atNotes); },),
-            IconButton(icon: Icon(Icons.category,
-              color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-            ), onPressed: () { changeAppState(AppState.atTopics); },),
-            SizedBox.shrink(),
-            IconButton(icon: Icon(Icons.archive,
-              color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-            ), onPressed: () { changeAppState(AppState.atArchived); },),
-            IconButton(icon: Icon(Icons.settings,
-              color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
-            ), onPressed: () { changeAppState(AppState.atSettings); },),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: IconButton(icon: Icon(Icons.home,
+                      color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+                    ), onPressed: () { changeAppState(AppState.atNotes); },),
+                  ),
+                  Expanded(
+                    child: IconButton(icon: Icon(Icons.category,
+                      color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+                    ), onPressed: () { changeAppState(AppState.atTopics); },),
+                  ),
+                ],
+              ),
+            ),
+            AnimatedContainer(
+              width:  currentIndex <= 1 ? 40 : 0,
+              duration: Duration(milliseconds: 200),
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: IconButton(icon: Icon(Icons.archive,
+                      color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+                    ), onPressed: () { changeAppState(AppState.atArchived); },),
+                  ),
+                  Expanded(
+                    child: IconButton(icon: Icon(Icons.settings,
+                      color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+                    ), onPressed: () { changeAppState(AppState.atSettings); },),
+                  ),
+                ],
+              )
+            ),
+            // IconButton(icon: Icon(Icons.home,
+            //   color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            // ), onPressed: () { changeAppState(AppState.atNotes); },),
+            // IconButton(icon: Icon(Icons.category,
+            //   color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            // ), onPressed: () { changeAppState(AppState.atTopics); },),
+            // IconButton(onPressed: null, icon: Icon(Icons.ac_unit),),
+            // IconButton(icon: Icon(Icons.archive,
+            //   color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            // ), onPressed: () { changeAppState(AppState.atArchived); },),
+            // IconButton(icon: Icon(Icons.settings,
+            //   color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+            // ), onPressed: () { changeAppState(AppState.atSettings); },),
           ],
         ),
       ),
