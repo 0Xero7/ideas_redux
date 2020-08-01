@@ -18,6 +18,9 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   Stream<NoteState> mapEventToState(NoteEvent event) async* {
     switch (event.eventType) {
       case EventType.add:
+        final secureStorage = FlutterSecureStorage();
+        // is note protected? if so, encrypt it and remove data 
+        
         var key = await NotesDB.addNote(event.newNote);
         event.newNote.id = key;
 
@@ -45,8 +48,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         yield newState;
         break;
 
-      case EventType.update:
-        
+      case EventType.update:        
         final secureStorage = FlutterSecureStorage();
         // is note protected? if so, encrypt it, and remove the data part
         if (event.newNote.protected) {

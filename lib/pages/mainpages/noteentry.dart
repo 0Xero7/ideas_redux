@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
@@ -12,6 +13,7 @@ import 'package:ideas_redux/state/topic_state.dart';
 import 'package:ideas_redux/widgets/back.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
 import 'package:ideas_redux/widgets/visual/checklist.dart';
+import 'package:ideas_redux/widgets/visual/roundbutton.dart';
 
 enum NoteEntryMode {
   ReadingMode,
@@ -43,6 +45,7 @@ class _NoteEntry extends State<NoteEntry> {
     if (widget.model.id == -1) BlocProvider.of<NoteBloc>(context).add( NoteEvent.addNote(widget.model) );
     else BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(widget.oldModel, widget.model) );
   }
+
 
   Widget _buildNonReorderList() {
     print("called");
@@ -214,7 +217,7 @@ class _NoteEntry extends State<NoteEntry> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Material(
-          color: Theme.of(context).buttonColor,
+          color: Theme.of(context).canvasColor,
           borderRadius: BorderRadius.circular(8),
           child: InkWell(
             borderRadius: BorderRadius.circular(8),
@@ -225,22 +228,21 @@ class _NoteEntry extends State<NoteEntry> {
 
               var res = await showDialog(
                 barrierColor: Colors.black.withAlpha(1),
+
                 
                 context: context,
                 builder: (context) => Stack(
                   children: [
                     Positioned(
-                      top: 132,
-                      left: 59,
+                      top: 133,
+                      left: 8,
                       right: 8,
 
                       child: Container(
-                        //height: 300,
-
                         child: Material(
                           elevation: 5,
                           shadowColor: Colors.black26,
-                          color: Theme.of(context).buttonColor,
+                          color: Theme.of(context).bottomAppBarColor,
                           borderRadius: BorderRadius.circular(8),
 
                           child: Padding(
@@ -313,249 +315,288 @@ class _NoteEntry extends State<NoteEntry> {
     );
   }
 
+  Widget _buildListChild(BuildContext context, int index) {
+    final i = widget.model.data[index];
+
+    switch (widget.model.data[index].runtimeType) {
+      case TextDataModel:
+        return Dismissible(
+            key: UniqueKey(),
+            direction: DismissDirection.startToEnd,
+            onDismissed: (direction) {
+              setState(() {
+                widget.model.data.remove(i);
+              });
+            },
+
+            background: Container(
+              color: Colors.red.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.delete),
+                  Text('Delete')
+                ],
+              ),
+            ),
+
+            child: Container(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 13),
+                child: TextField(
+                  controller: TextEditingController(text: (i as TextDataModel).data),
+                  onChanged: (s) => (i as TextDataModel).data = s,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Note",
+                    isDense: true
+                  ),
+                  style: Theme.of(context).textTheme.subtitle1,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          );
+          break;
+
+      case ChecklistModel:
+        return Dismissible(
+          key: UniqueKey(),
+          direction: DismissDirection.startToEnd,
+          background: Container(
+            color: Colors.red.shade100,
+            child: Row(
+              children: [
+                Icon(Icons.delete),
+                Text('Delete')
+              ],
+            ),
+          ),
+          onDismissed: (direction) => setState(() => widget.model.data.remove(i)),
+          child: Container(
+            key: UniqueKey(),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10, left: 2),
+              child: Checklist(i as ChecklistModel)
+            ),
+          ),
+        );
+        break;
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return PageWrapper(
-      child: Stack(
-        children: [
-          Positioned(
-            top: 20,
-            left: 15,
-            child: Back(
-              onPressed: () async {
-                  await saveNote();
-              },
-            )
-          ),
 
-          Positioned(
-            top: 32,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                'Editing',
-                style: Theme.of(context).textTheme.subtitle1,
-              )
-            ),
-          ),
-          
-          Positioned(
-            top: 20,
-            right: 15,
-            child: Material(
-              borderRadius: BorderRadius.circular(40),
-              color: Theme.of(context).highlightColor,
+    return WillPopScope(
+      onWillPop: () async { await saveNote(); return true; },
+      child: PageWrapper(
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverStickyHeader(
+                  sticky: true,
 
-              child: InkWell(
-                borderRadius: BorderRadius.circular(40),
-                onTap: () { 
-                  setState(() {
-                    widget.entryMode = widget.entryMode == NoteEntryMode.ReorderMode ? 
-                      NoteEntryMode.EditMode : NoteEntryMode.ReorderMode;
-                  });
-                },
-
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.shuffle),
-                ),
-              ),
-            )
-          ),
-
-          Positioned(
-            top: 80,
-            left:  0,
-            right: 0,
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: TextField(
-                    controller: TextEditingController(text: widget.model.title),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      isCollapsed: true,
-                      contentPadding: EdgeInsets.all(10),                
-                      hintText: "Title",
-                    ),
-                    onChanged: (e) => widget.model.title = e,
-                    
-                    style: Theme.of(context).textTheme.headline6
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const SizedBox(width: 13),
-                    Text('Topic', style: Theme.of(context).textTheme.subtitle1),
-                    Expanded(child: _buildTopicButton(context)),
-                  ],
-                ),
-                Divider()
-              ]
-            ),
-          ),
-
-          Positioned(
-            top: 180,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            
-            child: widget.entryMode == NoteEntryMode.ReorderMode ? _buildReorderableList(context) : _buildNonReorderList(),
-          ),
-
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-
-            child: Container(
-              height: 50,
-              color: Theme.of(context).cardColor.withAlpha(10),
-
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  const SizedBox(width: 10),
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: IconButton(
-                      icon: Icon(Icons.text_format),
-                      onPressed: () {
-                        setState(() {
-                          widget.model.data.add(TextDataModel(''));
-                        });
-                      },
+                  header: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      child: Container(
+                        height: 80,
+                        color: Theme.of(context).canvasColor.withAlpha(150),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Back(
+                                onPressed: () async {
+                                    await saveNote();
+                                },
+                              ),
+                              Text(
+                                'Editing',
+                                style: Theme.of(context).textTheme.subtitle1,
+                              ),
+                              RoundButton(
+                                child: Icon(Icons.shuffle),
+                                onPressed: () { 
+                                  setState(() {
+                                    widget.entryMode = widget.entryMode == NoteEntryMode.ReorderMode ? 
+                                      NoteEntryMode.EditMode : NoteEntryMode.ReorderMode;
+                                  });
+                                },
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  IconButton(
-                    icon: Icon(Icons.list),
-                    onPressed: () {
-                      setState(() {
-                        widget.model.data.add(
-                          ChecklistModel.emptyWithEntry()
+
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {                  
+                        if (index == widget.model.data.length + 1) return const SizedBox(height: 50);
+                        if (index >= 1) return _buildListChild(context, index - 1);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                              child: TextField(
+                                controller: TextEditingController(text: widget.model.title),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  isCollapsed: true,
+                                  contentPadding: EdgeInsets.all(10),                
+                                  hintText: "Title",
+                                ),
+                                onChanged: (e) => widget.model.title = e,
+                                
+                                style: Theme.of(context).textTheme.headline6
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                // const SizedBox(width: 13),
+                                // Text('Topic', style: Theme.of(context).textTheme.subtitle1),
+                                Expanded(child: _buildTopicButton(context)),
+                              ],
+                            ),
+                            Divider()
+                          ]
                         );
-                      });
-                    },
-                  ),
-                ],
-              ),
-            )
-          ),
-
-          Positioned(
-            right: 0,
-            bottom: 0,
-
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [             
-                // IconButton(
-                //   icon: Icon( widget.model.protected ? Icons.lock_open : Icons.lock_outline ),
-                //   onPressed: () {
-                //     setState(() {
-                //       widget.model.protected = !widget.model.protected;
-                //     });
-                //   },
-                // ),
-                // IconButton(
-                //   icon: Icon(Icons.menu),
-                //   onPressed: () async {
-                //     double left = MediaQuery.of(context).size.width - 150;
-                //     double top = MediaQuery.of(context).size.height - 100;
-                //     await showMenu(
-                //       context: context, 
-                //       position: RelativeRect.fromLTRB(left, top, 20, 10),
-                //       items: [
-                //         PopupMenuItem(
-                //           child: Row(
-                //             crossAxisAlignment: CrossAxisAlignment.center,
-                //             children: [
-                //               Icon(Icons.lock_outline, size: 20,),
-                //               const SizedBox(width: 10,),
-                //               Text('Protect')
-                //             ],
-                //           ),
-                //         )
-                //       ]
-                //     );
-                //   },
-                // ),
-                PopupMenuButton(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'protect':
-                        setState(() {
-                          widget.model.protected = !widget.model.protected;
-                        });
-                        break;
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(widget.model.protected ? Icons.lock_open : Icons.lock_outline, size: 18,),
-                          const SizedBox(width: 5,),
-                          Padding(
-                            padding: EdgeInsets.only(top: 2),
-                            child: Text(
-                              !widget.model.protected ? 
-                                'Protect' : 'Remove protection',
-                            )
-                          )
-                        ],
-                      ),
-                      value: 'protect',
-                    ),
-                    PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(Icons.archive, size: 18,),
-                          const SizedBox(width: 5,),
-                          Padding(
-                            padding: EdgeInsets.only(top: 2),
-                            child: Text(
-                              'Archive',
-                            )
-                          )
-                        ],
-                      ),
-                      value: 'archived',
-                    ),
-                    PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_outline, size: 18,),
-                          const SizedBox(width: 5,),
-                          Padding(
-                            padding: EdgeInsets.only(top: 2),
-                            child: Text(
-                              'Delete',
-                            )
-                          )
-                        ],
-                      ),
-                      value: 'delete',
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 5),   
+                      },
+                      childCount: widget.model.data.length + 2,
+                    )
+                  )
+                )
               ],
             ),
-          )          
-        ],
+
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  child: Container(
+                    height: 50,
+                    color: Theme.of(context).cardColor.withAlpha(60),
+
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: IconButton(
+                            icon: Icon(Icons.text_format),
+                            onPressed: () {
+                              setState(() {
+                                widget.model.data.add(TextDataModel(''));
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        IconButton(
+                          icon: Icon(Icons.list),
+                          onPressed: () {
+                            setState(() {
+                              widget.model.data.add(
+                                ChecklistModel.emptyWithEntry()
+                              );
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ),
+
+            Positioned(
+              right: 0,
+              bottom: 0,
+
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  PopupMenuButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'protect':
+                          setState(() {
+                            widget.model.protected = !widget.model.protected;
+                          });
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        child: Row(
+                          children: [
+                            Icon(widget.model.protected ? Icons.lock_open : Icons.lock_outline, size: 18,),
+                            const SizedBox(width: 5,),
+                            Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Text(
+                                !widget.model.protected ? 
+                                  'Protect' : 'Remove protection',
+                              )
+                            )
+                          ],
+                        ),
+                        value: 'protect',
+                      ),
+                      PopupMenuItem(
+                        child: Row(
+                          children: [
+                            Icon(Icons.archive, size: 18,),
+                            const SizedBox(width: 5,),
+                            Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Text(
+                                'Archive',
+                              )
+                            )
+                          ],
+                        ),
+                        value: 'archived',
+                      ),
+                      PopupMenuItem(
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, size: 18,),
+                            const SizedBox(width: 5,),
+                            Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Text(
+                                'Delete',
+                              )
+                            )
+                          ],
+                        ),
+                        value: 'delete',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 5),   
+                ],
+              ),
+            )       
+          ]
+        )
       ),
-    ); 
+    );
   }
 }

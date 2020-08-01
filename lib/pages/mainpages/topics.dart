@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
@@ -136,7 +137,10 @@ class _Topics extends State<Topics> {
               // for (int id in _state.selection)
               //   BlocProvider.of<NoteBloc>(context).add( NoteEvent.deleteNoteWithID(id) );
               // _state.clearSelection();
-            child: Icon(Icons.delete, color: Colors.red.shade400),
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Icon(FeatherIcons.trash, size: 20, color: Colors.red.shade400),
+            ),
           ),
           const SizedBox(width: 10),
           RoundButton(
@@ -328,10 +332,13 @@ class _Topics extends State<Topics> {
                                             children: [
                                               Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
                                               const SizedBox(width: 5),
-                                              Text( 
-                                                state.topics[snapshot.data[id]].topicName ?? "", 
-                                                textAlign: TextAlign.start,
-                                                style: Theme.of(context).textTheme.subtitle1
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 2),
+                                                child: Text( 
+                                                  state.topics[snapshot.data[id]].topicName ?? "", 
+                                                  textAlign: TextAlign.start,
+                                                  style: Theme.of(context).textTheme.subtitle1
+                                                ),
                                               ),
 
                                               // TODO: Implement reorder later.

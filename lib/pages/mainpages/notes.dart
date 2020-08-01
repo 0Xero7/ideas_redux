@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -104,7 +105,10 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
                 BlocProvider.of<NoteBloc>(context).add( NoteEvent.moveToArchived( id ) );
               _state.clearSelection();
             },
-            child: Icon(Icons.archive, color: Colors.black87,),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Icon(FeatherIcons.archive, size: 17,),
+            ),
           ),
           const SizedBox(width: 10,),
           RoundButton(
@@ -113,7 +117,10 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
                 BlocProvider.of<NoteBloc>(context).add( NoteEvent.deleteNoteWithID(id) );
               _state.clearSelection();
             },
-            child: Icon(Icons.delete, color: Colors.red.shade400),
+            child: Padding(
+              padding: const EdgeInsets.all(3.5),
+              child: Icon(FeatherIcons.trash, size: 18, color: Colors.red.shade400,),
+            ),
           ),
         ],
       ),
@@ -317,7 +324,20 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       builder: (cxt, noteList) {
         return StreamBuilder(
           stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
-          builder: (context, snapshot) => StaggeredGridView.countBuilder(
+          builder: (context, snapshot) => ((snapshot.data?.length ?? 0) == 0) ?
+            Center(
+              child: Opacity(
+                opacity: 0.4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.folder_open, size: 40),
+                    Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
+                  ],
+                ),
+              ),
+            )
+          : StaggeredGridView.countBuilder(
             padding: EdgeInsets.only(top: 10, left: 10, right: 10),
             crossAxisCount: 2,
             mainAxisSpacing: 10,

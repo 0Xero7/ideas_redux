@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:ideas_redux/state/settings_state.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
@@ -62,7 +63,21 @@ class _SettingsPage extends State<SettingsPage> {
                       await state.setDarkTheme(e);
                     },
                     value: state.darkTheme,
-                    title: Text('Dark Theme'),
+                    title: Row(
+                      children: [
+                        AnimatedSwitcher(
+                          child: state.darkTheme ? Icon(FeatherIcons.moon, size: 20, key: UniqueKey()) : Icon(FeatherIcons.sun, size: 20, key: UniqueKey()),
+                          duration: Duration(milliseconds: 100),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeOutCubic,
+                        ),                        
+                        const SizedBox(width: 7,),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text('Dark Theme'),
+                        ),
+                      ],
+                    ),
                   ),
                   Divider(
                     indent: 10,
@@ -71,9 +86,12 @@ class _SettingsPage extends State<SettingsPage> {
                   ListTile(
                     title: Row(
                       children: [
-                        Icon(Icons.info_outline),
-                        const SizedBox(width: 5,),
-                        Text('About'),
+                        Icon(FeatherIcons.info, size: 20,),
+                        const SizedBox(width: 7,),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.4),
+                          child: Text('About'),
+                        ),
                       ],
                     ),
                     onTap: () => Navigator.pushNamed(context, '/about') ,
