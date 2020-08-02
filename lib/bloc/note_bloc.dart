@@ -19,8 +19,22 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     switch (event.eventType) {
       case EventType.add:
         final secureStorage = FlutterSecureStorage();
-        // is note protected? if so, encrypt it and remove data 
-        
+        // is note protected? if so, encrypt it and remove data
+        if (event.newNote.protected) {          
+          var json = jsonEncode(event.newNote.getDataAsJson());
+          event.newNote.data.clear();
+          
+          String _key, _iv;
+          _key = randomString(32);
+          _iv = randomString(16);
+
+          // write key and iv to keystore
+          await secureStorage.write(key: '${event.newNote.randomId}_key', value: _key);
+          await secureStorage.write(key: '${event.newNote.randomId}_iv', value: _iv);
+
+          event.newNote.encryptedData = encryptAES(json, _key, _iv);
+        }
+
         var key = await NotesDB.addNote(event.newNote);
         event.newNote.id = key;
 

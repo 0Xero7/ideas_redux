@@ -384,6 +384,37 @@ class _NoteEntry extends State<NoteEntry> {
     }
   }
 
+  Widget _buildTopBar(context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: TextField(
+          controller: TextEditingController(text: widget.model.title),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            isCollapsed: true,
+            contentPadding: EdgeInsets.all(10),                
+            hintText: "Title",
+          ),
+          onChanged: (e) => widget.model.title = e,
+          
+          style: Theme.of(context).textTheme.headline6
+        ),
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          // const SizedBox(width: 13),
+          // Text('Topic', style: Theme.of(context).textTheme.subtitle1),
+          Expanded(child: _buildTopicButton(context)),
+        ],
+      ),
+      Divider()
+    ]
+  );
+
 
   @override
   Widget build(BuildContext context) {
@@ -403,7 +434,7 @@ class _NoteEntry extends State<NoteEntry> {
                       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                       child: Container(
                         height: 80,
-                        color: Theme.of(context).canvasColor.withAlpha(150),
+                        color: Theme.of(context).canvasColor.withAlpha(200),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: Row(
@@ -437,38 +468,9 @@ class _NoteEntry extends State<NoteEntry> {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {                  
-                        if (index == widget.model.data.length + 1) return const SizedBox(height: 50);
-                        if (index >= 1) return _buildListChild(context, index - 1);
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5),
-                              child: TextField(
-                                controller: TextEditingController(text: widget.model.title),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  isCollapsed: true,
-                                  contentPadding: EdgeInsets.all(10),                
-                                  hintText: "Title",
-                                ),
-                                onChanged: (e) => widget.model.title = e,
-                                
-                                style: Theme.of(context).textTheme.headline6
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              children: [
-                                // const SizedBox(width: 13),
-                                // Text('Topic', style: Theme.of(context).textTheme.subtitle1),
-                                Expanded(child: _buildTopicButton(context)),
-                              ],
-                            ),
-                            Divider()
-                          ]
-                        );
+                        if (index == 0) return _buildTopBar(context);
+                        if (index >= 1 && index <= widget.model.data.length) return _buildListChild(context, index - 1);
+                        return const SizedBox(height: 50); // end padding
                       },
                       childCount: widget.model.data.length + 2,
                     )
@@ -484,10 +486,10 @@ class _NoteEntry extends State<NoteEntry> {
 
               child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
                   child: Container(
                     height: 50,
-                    color: Theme.of(context).cardColor.withAlpha(60),
+                    color: Theme.of(context).cardColor.withAlpha(170),
 
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
