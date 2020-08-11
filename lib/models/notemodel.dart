@@ -1,6 +1,7 @@
 import 'package:ideas_redux/helpers/crypto_helper.dart';
 import 'package:ideas_redux/models/datamodels/basedatamodel.dart';
 import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
+import 'package:ideas_redux/models/datamodels/imagedatamodel.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 
 class NoteModel {
@@ -67,6 +68,8 @@ class NoteModel {
           model.data.add(TextDataModel.fromMap(i));
         else if (i['type'] == 'checklist')
           model.data.add(ChecklistModel.fromMap(i));
+        else if (i['type'] == 'image')
+          model.data.add(ImageDataModel.fromMap(i));
       }
     } else { // protected data
       model.encryptedData = arg['data'];
@@ -91,6 +94,13 @@ class NoteModel {
 
           _data.add( t.toMap() );
           break;
+
+        case ImageDataModel:
+          var t = i as ImageDataModel;
+          assert(t.path != null);
+
+          _data.add( t.toMap() );
+          break;
       }
     }
     return _data;
@@ -103,6 +113,8 @@ class NoteModel {
           data.add(TextDataModel.fromMap(i));
         else if (i['type'] == 'checklist')
           data.add(ChecklistModel.fromMap(i));
+        else if (i['type'] == 'image')
+          data.add(ImageDataModel.fromMap(i));
       }
   }
 
@@ -124,32 +136,7 @@ class NoteModel {
 
     if (!protected) res['data'] = getDataAsJson();
     else res['data'] = encryptedData;
-
-    // if (!protected) { // unprotected data
-    //   var _data = List<Map<String, dynamic>>();
-    //   for (var i in data) {
-    //     switch (i.runtimeType) {
-    //       case TextDataModel:
-    //         var t = i as TextDataModel;
-
-    //         _data.add( t.toMap() );
-    //         break;
-
-    //       case ChecklistModel:
-    //         var t = i as ChecklistModel;
-    //         assert(t.data != null && t.data.length > 0);
-
-    //         _data.add( t.toMap() );
-    //         break;
-    //     }
-    //   }
-
-    //   res['data'] = _data;
-    // } else { // protected data
-    //   var _data = encryptedData;
-    //   res['data'] = _data;
-    // }
-
+    
     return res;
   }
 }

@@ -1,1 +1,3 @@
-abstract class BaseDataModel {}
+abstract class BaseDataModel {
+  int id;
+}

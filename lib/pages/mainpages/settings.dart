@@ -1,4 +1,4 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:ideas_redux/state/settings_state.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
@@ -66,7 +66,7 @@ class _SettingsPage extends State<SettingsPage> {
                     title: Row(
                       children: [
                         AnimatedSwitcher(
-                          child: state.darkTheme ? Icon(FeatherIcons.moon, size: 20, key: UniqueKey()) : Icon(FeatherIcons.sun, size: 20, key: UniqueKey()),
+                          child: state.darkTheme ? Icon(Feather.moon, size: 20, key: UniqueKey()) : Icon(Feather.sun, size: 20, key: UniqueKey()),
                           duration: Duration(milliseconds: 100),
                           switchInCurve: Curves.easeOutCubic,
                           switchOutCurve: Curves.easeOutCubic,
@@ -86,7 +86,7 @@ class _SettingsPage extends State<SettingsPage> {
                   ListTile(
                     title: Row(
                       children: [
-                        Icon(FeatherIcons.info, size: 20,),
+                        Icon(Feather.info, size: 20,),
                         const SizedBox(width: 7,),
                         Padding(
                           padding: const EdgeInsets.only(top: 2.4),
@@ -96,33 +96,33 @@ class _SettingsPage extends State<SettingsPage> {
                     ),
                     onTap: () => Navigator.pushNamed(context, '/about') ,
                   ),
-                  Divider(
-                    indent: 10,
-                    endIndent: 10,
-                  ),
+                  // Divider(
+                  //   indent: 10,
+                  //   endIndent: 10,
+                  // ),
                   // ListTile(
                   //   subtitle: Text('Like the app?', style: Theme.of(context).textTheme.subtitle2,),
                   // ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Icon(Icons.play_arrow),
-                        const SizedBox(width: 5,),
-                        Text('Rate on Google Play!'),
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Icon(Icons.store),
-                        const SizedBox(width: 5,),
-                        Text('Buy me a coffee!'),
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
+                  // ListTile(
+                  //   title: Row(
+                  //     children: [
+                  //       Icon(Icons.play_arrow),
+                  //       const SizedBox(width: 5,),
+                  //       Text('Rate on Google Play!'),
+                  //     ],
+                  //   ),
+                  //   onTap: () {},
+                  // ),
+                  // ListTile(
+                  //   title: Row(
+                  //     children: [
+                  //       Icon(Icons.store),
+                  //       const SizedBox(width: 5,),
+                  //       Text('Buy me a coffee!'),
+                  //     ],
+                  //   ),
+                  //   onTap: () {},
+                  // ),
                 ],
               ),
             )

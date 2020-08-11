@@ -14,7 +14,7 @@ class NotesDB {
     Hive.init(docPath.path);
     
     // store notes in json format
-    //await Hive.deleteBoxFromDisk("notes");
+    // await Hive.deleteBoxFromDisk("notes");
     _noteBox = await Hive.openBox<String>("notes");
 
     // DEV ONLY
@@ -26,6 +26,8 @@ class NotesDB {
 
     for (var key in _noteBox.keys) {
       String json = _noteBox.get(key);
+
+      print(json);
             
       var model = NoteModel.fromMap((jsonDecode(json)) as Map<String, dynamic>);
       model.id = key;

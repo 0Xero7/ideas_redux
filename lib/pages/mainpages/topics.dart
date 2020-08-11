@@ -1,4 +1,4 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
@@ -139,7 +139,7 @@ class _Topics extends State<Topics> {
               // _state.clearSelection();
             child: Padding(
               padding: const EdgeInsets.all(2.0),
-              child: Icon(FeatherIcons.trash, size: 20, color: Colors.red.shade400),
+              child: Icon(Feather.trash, size: 20, color: Colors.red.shade400),
             ),
           ),
           const SizedBox(width: 10),

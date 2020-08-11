@@ -1,18 +1,22 @@
+import 'dart:math';
+
 import 'package:ideas_redux/models/datamodels/basedatamodel.dart';
 import 'package:ideas_redux/models/datamodels/checklistitemmodel.dart';
 
 class ChecklistModel extends BaseDataModel {
   List<ChecklistElementModel> data;
 
-  ChecklistModel() { data = List<ChecklistElementModel>(); }
-  factory ChecklistModel.withData(data) {
+  ChecklistModel() { data = List<ChecklistElementModel>(); super.id = Random.secure().nextInt(10000); }
+  factory ChecklistModel.withData(List<ChecklistElementModel> data) {
     ChecklistModel model = ChecklistModel();
     model.data = data;
+    model.id = Random.secure().nextInt(10000);
     return model;
   }
 
   ChecklistModel.emptyWithEntry() {
     data = List<ChecklistElementModel>();
+    super.id = Random.secure().nextInt(10000);
     addEmpty();
   }
 

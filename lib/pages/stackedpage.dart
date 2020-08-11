@@ -1,4 +1,4 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
@@ -84,7 +84,7 @@ class _StackedPageState extends State<StackedPage> {
                 children: [
                   Expanded(
                     child: FlatButton(
-                      child: Icon(FeatherIcons.home, size: 22,
+                      child: Icon(Feather.home, size: 22,
                         color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                       ), 
                       onPressed: () { changeAppState(AppState.atNotes); }, highlightColor: Colors.transparent
@@ -98,7 +98,7 @@ class _StackedPageState extends State<StackedPage> {
                     ),
                   ),
                   Expanded(
-                    child: FlatButton(child: Icon(FeatherIcons.list, size: 22,
+                    child: FlatButton(child: Icon(Feather.list, size: 22,
                       color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atTopics); }, highlightColor: Colors.transparent),
                   ),
@@ -124,7 +124,7 @@ class _StackedPageState extends State<StackedPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: FlatButton(child: Icon(FeatherIcons.archive, size: 21,
+                    child: FlatButton(child: Icon(Feather.archive, size: 21,
                       color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atArchived); }, highlightColor: Colors.transparent),
                   ),
@@ -136,7 +136,7 @@ class _StackedPageState extends State<StackedPage> {
                     ),
                   ),
                   Expanded(
-                    child: FlatButton(child: Icon(FeatherIcons.settings, size: 20,
+                    child: FlatButton(child: Icon(Feather.settings, size: 20,
                       color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atSettings); }, highlightColor: Colors.transparent),
                   ),
@@ -171,7 +171,7 @@ class _StackedPageState extends State<StackedPage> {
       
       floatingActionButton: (currentIndex == 0 || currentIndex == 1) ?
         FloatingActionButton(
-          child: Icon(FeatherIcons.plus, size: 25,),
+          child: Icon(Feather.plus, size: 25,),
           onPressed: () async { 
             switch (currentIndex) {
               case 0:

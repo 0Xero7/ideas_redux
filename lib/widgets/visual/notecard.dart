@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ideas_redux/helpers/note_entry_decrypt_helper.dart';
 import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
+import 'package:ideas_redux/models/datamodels/imagedatamodel.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 import 'package:ideas_redux/models/notemodel.dart';
 import 'package:ideas_redux/state/selection_state.dart';
@@ -71,6 +74,16 @@ class NoteCard extends StatelessWidget {
               ],
             ));
           }
+
+          break;
+        
+        case ImageDataModel:
+          var t = (i as ImageDataModel);
+          
+          res.add( Image.file(
+              File.fromRawPath( utf8.encode(t.path) )
+            )
+          );
 
           break;
       }

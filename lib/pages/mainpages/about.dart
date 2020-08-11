@@ -8,18 +8,6 @@ class AboutPage extends StatelessWidget {
     return PageWrapper(
       child: Stack(
         children: [
-          // Positioned(
-          //   top: 0,
-          //   left: 0,
-          //   right: 0,
-          //   child: Container(
-          //     height: 85,
-          //     decoration: BoxDecoration(
-          //       color: Theme.of(context).bottomAppBarColor
-          //     ),
-          //   ),
-          // ),
-
           Positioned(
             top: 20,
             left: 15,
@@ -55,9 +43,17 @@ class AboutPage extends StatelessWidget {
             child: Center(
               child: Opacity(
                 opacity: 0.4,
-                child: Text(
-                  'version 300720b0',
-                  style: Theme.of(context).textTheme.subtitle2,
+                child: Column(
+                  children: [
+                    Text(
+                      'version 030820b1',
+                      style: Theme.of(context).textTheme.subtitle2,
+                    ),
+                    Opacity(
+                      opacity: 1,
+                      child: Text('this is an ALPHA version', style: TextStyle(fontSize: 10, color: Colors.red))
+                    ),
+                  ],
                 ),
               )
             ),
@@ -79,11 +75,11 @@ class AboutPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 0),
                 FlatButton(
                   onPressed: () {},
                   child: Text(
-                    '@0xero7',
+                    'Soumya Pattanayak',
                     style: Theme.of(context).textTheme.headline5,
                   ),
                 )

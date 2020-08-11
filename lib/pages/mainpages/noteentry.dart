@@ -1,12 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
 import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
+import 'package:ideas_redux/models/datamodels/imagedatamodel.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 import 'package:ideas_redux/models/notemodel.dart';
 import 'package:ideas_redux/state/topic_state.dart';
@@ -14,6 +19,7 @@ import 'package:ideas_redux/widgets/back.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
 import 'package:ideas_redux/widgets/visual/checklist.dart';
 import 'package:ideas_redux/widgets/visual/roundbutton.dart';
+import 'package:image_picker/image_picker.dart';
 
 enum NoteEntryMode {
   ReadingMode,
@@ -42,6 +48,9 @@ class _NoteEntry extends State<NoteEntry> {
   }
 
   Future saveNote() async {
+    if (widget.model.title == null || widget.model.title.trim() == '') return;
+    if (widget.model.data == null || widget.model.data.length == 0) return;
+
     if (widget.model.id == -1) BlocProvider.of<NoteBloc>(context).add( NoteEvent.addNote(widget.model) );
     else BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(widget.oldModel, widget.model) );
   }
@@ -320,65 +329,38 @@ class _NoteEntry extends State<NoteEntry> {
 
     switch (widget.model.data[index].runtimeType) {
       case TextDataModel:
-        return Dismissible(
-            key: UniqueKey(),
-            direction: DismissDirection.startToEnd,
-            onDismissed: (direction) {
-              setState(() {
-                widget.model.data.remove(i);
-              });
-            },
-
-            background: Container(
-              color: Colors.red.shade100,
-              child: Row(
-                children: [
-                  Icon(Icons.delete),
-                  Text('Delete')
-                ],
+        return Container(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 13),
+            child: TextField(
+              controller: TextEditingController(text: (i as TextDataModel).data),
+              onChanged: (s) => (i as TextDataModel).data = s,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Note",
+                isDense: true
               ),
+              style: Theme.of(context).textTheme.subtitle1,
+              maxLines: null,
             ),
-
-            child: Container(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 13),
-                child: TextField(
-                  controller: TextEditingController(text: (i as TextDataModel).data),
-                  onChanged: (s) => (i as TextDataModel).data = s,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Note",
-                    isDense: true
-                  ),
-                  style: Theme.of(context).textTheme.subtitle1,
-                  maxLines: null,
-                ),
-              ),
-            ),
-          );
+          ),
+        );
           break;
 
       case ChecklistModel:
-        return Dismissible(
+        return Container(
           key: UniqueKey(),
-          direction: DismissDirection.startToEnd,
-          background: Container(
-            color: Colors.red.shade100,
-            child: Row(
-              children: [
-                Icon(Icons.delete),
-                Text('Delete')
-              ],
-            ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 0),
+            child: Checklist(i as ChecklistModel)
           ),
-          onDismissed: (direction) => setState(() => widget.model.data.remove(i)),
-          child: Container(
-            key: UniqueKey(),
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10, left: 2),
-              child: Checklist(i as ChecklistModel)
-            ),
-          ),
+        );
+        break;
+
+      case ImageDataModel:
+        return Container(
+          key: UniqueKey(),
+          child: Image.file(File.fromRawPath( utf8.encode((i as ImageDataModel).path)) ),
         );
         break;
     }
@@ -415,6 +397,7 @@ class _NoteEntry extends State<NoteEntry> {
     ]
   );
 
+  final scaffoldState = ScaffoldState();
 
   @override
   Widget build(BuildContext context) {
@@ -422,61 +405,115 @@ class _NoteEntry extends State<NoteEntry> {
     return WillPopScope(
       onWillPop: () async { await saveNote(); return true; },
       child: PageWrapper(
+        key: ValueKey(scaffoldState),
         child: Stack(
           children: [
-            CustomScrollView(
-              slivers: [
-                SliverStickyHeader(
-                  sticky: true,
+            ReorderableList(
+              onReorder: (draggedItem, newPosition) {
+                final int from = widget.model.data.indexWhere((model) => model.id == (draggedItem as ValueKey).value);
+                final int to = widget.model.data.indexWhere((model) => model.id == (newPosition as ValueKey).value);
+                // final int to = (newPosition as ValueKey).value;
 
-                  header: ClipRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                      child: Container(
-                        height: 80,
-                        color: Theme.of(context).canvasColor.withAlpha(200),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Back(
-                                onPressed: () async {
-                                    await saveNote();
-                                },
-                              ),
-                              Text(
-                                'Editing',
-                                style: Theme.of(context).textTheme.subtitle1,
-                              ),
-                              RoundButton(
-                                child: Icon(Icons.shuffle),
-                                onPressed: () { 
-                                  setState(() {
-                                    widget.entryMode = widget.entryMode == NoteEntryMode.ReorderMode ? 
-                                      NoteEntryMode.EditMode : NoteEntryMode.ReorderMode;
-                                  });
-                                },
-                              )
-                            ],
+                final _draggedItem = widget.model.data[from];
+                print('$from -> $to');
+                setState(() {
+                  widget.model.data.removeAt(from);
+                  widget.model.data.insert(to, _draggedItem);
+                });
+                return true;
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverStickyHeader(
+                    sticky: true,
+
+                    header: ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Container(
+                          height: 80,
+                          color: Theme.of(context).canvasColor.withAlpha(200),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Back(
+                                  onPressed: () async {
+                                      await saveNote();
+                                  },
+                                ),
+                                Text(
+                                  'Editing',
+                                  style: Theme.of(context).textTheme.subtitle1,
+                                ),
+                                RoundButton(
+                                  child: Icon(Icons.shuffle),
+                                  onPressed: () { 
+                                    setState(() {
+                                      widget.entryMode = widget.entryMode == NoteEntryMode.ReorderMode ? 
+                                        NoteEntryMode.EditMode : NoteEntryMode.ReorderMode;
+                                    });
+                                  },
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
 
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {                  
-                        if (index == 0) return _buildTopBar(context);
-                        if (index >= 1 && index <= widget.model.data.length) return _buildListChild(context, index - 1);
-                        return const SizedBox(height: 50); // end padding
-                      },
-                      childCount: widget.model.data.length + 2,
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {                  
+                          if (index == 0) return _buildTopBar(context);
+                          if (index >= 1 && index <= widget.model.data.length) 
+                            return ReorderableItem(
+                              key: ValueKey(widget.model.data[index - 1].id),
+                              childBuilder: (context, reorderState) => Opacity(
+                                opacity: reorderState == ReorderableItemState.placeholder ? 0 : 1,
+                                child: Dismissible(
+                                  key: UniqueKey(),
+                                  direction: DismissDirection.startToEnd,
+                                  onDismissed: (direction) {
+                                    setState(() => widget.model.data.removeAt(index - 1));
+                                  },
+
+                                  background: Container(
+                                    color: Colors.red.shade400,
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 2.0, left: 10, right: 4),
+                                          child: const Icon(Feather.trash, color: Colors.white, size: 16),
+                                        ),
+                                        const Text('Delete', style: TextStyle(color: Colors.white, fontSize: 15),)
+                                      ],
+                                    ),
+                                  ),
+
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 7, right: 10),
+                                    child: Row(
+                                      children: [
+                                        ReorderableListener(
+                                          child: Icon(Icons.drag_handle),
+                                        ),
+                                        Expanded(child: _buildListChild(context, index - 1)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          return const SizedBox(height: 50); // end padding
+                        },
+                        childCount: widget.model.data.length + 2,
+                      )
                     )
                   )
-                )
-              ],
+                ],
+              ),
             ),
 
             Positioned(
@@ -517,6 +554,62 @@ class _NoteEntry extends State<NoteEntry> {
                               );
                             });
                           },
+                        ),
+                        const SizedBox(width: 5),
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: Icon(Feather.image, size: 21,),
+                            onPressed: () async {
+                              var picker = ImagePicker();
+
+                              var src = await showModalBottomSheet(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                context: context,
+                                builder: (context) => Container(
+                                  padding: EdgeInsets.symmetric(vertical: 15),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('Choose a source', style: Theme.of(context).textTheme.subtitle1,),
+                                      FlatButton(
+                                        onPressed: () => Navigator.pop(context, ImageSource.camera),
+                                        child: Row(
+                                          children: [
+                                            Icon(Feather.camera, size: 20),
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 7, top: 2.5),
+                                              child: Text('Camera'),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      FlatButton(
+                                        onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                                        child: Row(
+                                          children: [
+                                            Icon(Feather.image, size: 20),
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 7, top: 2.5),
+                                              child: Text('Gallery'),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                              if (src == null) return;
+
+                              var file = await picker.getImage(source: src);
+
+                              if (file != null) {
+                                setState(() {
+                                  widget.model.data.add(ImageDataModel(file.path));
+                                });
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
