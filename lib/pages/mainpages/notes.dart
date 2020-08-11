@@ -47,7 +47,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       top: 20,
       left: _state.selecting ? 0 : 20,
 
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 2000),
       curve: Curves.easeOutCubic,
 
       child: Text(
@@ -155,7 +155,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
   Stream<List<int>> _getFilteredTopicNotes(BuildContext context, NoteState state, int topicId, String searchString) async* {
     var res = new List<int>();
 
-    if (state.notesInCategory[topicId] == null) yield [];
+    if (state.notesInCategory[topicId] == null) yield res;
     else {
       for (var modelId in state.notesInCategory[topicId]) {
         if (state.noteRef[modelId].title.toLowerCase().contains(searchString)) {
@@ -322,32 +322,47 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
     BlocConsumer<NoteBloc, NoteState>(
       listener: (_, __) {},
       builder: (cxt, noteList) {
-        return StreamBuilder(
-          stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
-          builder: (context, snapshot) => ((snapshot.data?.length ?? 0) == 0) ?
-            Center(
-              child: Opacity(
-                opacity: 0.4,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.folder_open, size: 40),
-                    Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
-                  ],
-                ),
-              ),
-            )
-          : StaggeredGridView.countBuilder(
+        return StaggeredGridView.countBuilder(
             padding: EdgeInsets.only(top: 10, left: 10, right: 10),
             crossAxisCount: 2,
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
 
-            itemCount: snapshot.data?.length ?? 0,
+            itemCount: noteList.notesInCategory[topicKey].length,
             staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-            itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
-          ),
-        );
+            itemBuilder: (_, index) => NoteCard( noteList.noteRef[noteList.notesInCategory[topicKey][index]] )
+          );
+        
+        
+        // StreamBuilder(
+        //   stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
+        //   builder: (context, snapshot) {
+        //     // print(snapshot.data.length);
+        //     return ((snapshot.data?.length ?? 0) == 0) ?
+        //     Center(
+        //       child: Opacity(
+        //         opacity: 0.4,
+        //         child: Column(
+        //           mainAxisAlignment: MainAxisAlignment.center,
+        //           children: [
+        //             Icon(Icons.folder_open, size: 40),
+        //             Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
+        //           ],
+        //         ),
+        //       ),
+        //     )
+        //   : StaggeredGridView.countBuilder(
+        //     padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+        //     crossAxisCount: 2,
+        //     mainAxisSpacing: 10,
+        //     crossAxisSpacing: 10,
+
+        //     itemCount: snapshot.data?.length ?? 0,
+        //     staggeredTileBuilder: (index) => StaggeredTile.fit(1),
+        //     itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
+        //   );
+        //   },
+        // );
       }
     );
 }
