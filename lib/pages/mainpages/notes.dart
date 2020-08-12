@@ -322,47 +322,35 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
     BlocConsumer<NoteBloc, NoteState>(
       listener: (_, __) {},
       builder: (cxt, noteList) {
-        return StaggeredGridView.countBuilder(
+        return StreamBuilder(
+          stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
+          builder: (context, snapshot) {
+            // print(snapshot.data.length);
+            return ((snapshot.data?.length ?? 0) == 0) ?
+            Center(
+              child: Opacity(
+                opacity: 0.4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.folder_open, size: 40),
+                    Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
+                  ],
+                ),
+              ),
+            )
+          : StaggeredGridView.countBuilder(
             padding: EdgeInsets.only(top: 10, left: 10, right: 10),
             crossAxisCount: 2,
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
 
-            itemCount: noteList.notesInCategory[topicKey].length,
+            itemCount: snapshot.data?.length ?? 0,
             staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-            itemBuilder: (_, index) => NoteCard( noteList.noteRef[noteList.notesInCategory[topicKey][index]] )
+            itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
           );
-        
-        
-        // StreamBuilder(
-        //   stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
-        //   builder: (context, snapshot) {
-        //     // print(snapshot.data.length);
-        //     return ((snapshot.data?.length ?? 0) == 0) ?
-        //     Center(
-        //       child: Opacity(
-        //         opacity: 0.4,
-        //         child: Column(
-        //           mainAxisAlignment: MainAxisAlignment.center,
-        //           children: [
-        //             Icon(Icons.folder_open, size: 40),
-        //             Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
-        //           ],
-        //         ),
-        //       ),
-        //     )
-        //   : StaggeredGridView.countBuilder(
-        //     padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-        //     crossAxisCount: 2,
-        //     mainAxisSpacing: 10,
-        //     crossAxisSpacing: 10,
-
-        //     itemCount: snapshot.data?.length ?? 0,
-        //     staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-        //     itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
-        //   );
-        //   },
-        // );
+          },
+        );
       }
     );
 }
