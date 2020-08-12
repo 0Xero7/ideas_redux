@@ -8,7 +8,7 @@ class PageWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: key ?? UniqueKey(),
+      key: key,// ?? UniqueKey(),
       body: SafeArea(
         top: true,
         child: child,
