@@ -47,7 +47,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       top: 20,
       left: _state.selecting ? 0 : 20,
 
-      duration: Duration(milliseconds: 2000),
+      duration: Duration(milliseconds: 200),
       curve: Curves.easeOutCubic,
 
       child: Text(

@@ -76,7 +76,7 @@ class _Archived extends State<Archived> {
       top: 25,
       right: !_state.selecting ? 0 : 15,
 
-      duration: Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 100),
       curve: Curves.easeOutCubic,
 
       child: Row(
