@@ -52,9 +52,12 @@ class NoteCard extends StatelessWidget {
           if (limitedString.length < (i as TextDataModel).data.length) limitedString += "...";
           
           count += limitedString.length;
-          res.add(Text(
-            limitedString,
-            style: Theme.of(context).textTheme.subtitle2,
+          res.add(Opacity(
+            opacity: 0.7,
+            child: Text(
+              limitedString,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
           ));
           break;
 
@@ -80,9 +83,12 @@ class NoteCard extends StatelessWidget {
         case ImageDataModel:
           var t = (i as ImageDataModel);
           
-          res.add( Image.file(
-              File.fromRawPath( utf8.encode(t.path) )
-            )
+          res.add( ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: Image.file(
+                File.fromRawPath( utf8.encode(t.path) )
+              ),
+          )
           );
 
           break;
@@ -140,10 +146,15 @@ class NoteCard extends StatelessWidget {
               crossAxisAlignment: data.protected ? CrossAxisAlignment.center : CrossAxisAlignment.start,
               children: [
                 Text('${data.title}', style: Theme.of(context).textTheme.headline6),
-                const SizedBox(height: 5), 
+                Opacity(
+                  opacity: 0.75,
+                  child: Text('${3} days ago', style: Theme.of(context).textTheme.caption)
+                ),
+                const SizedBox(height: 10), 
 
                 Column(
-                  children: data.protected ? buildProtectedThumbnail(context) : buildThumbnail(context),
+                  crossAxisAlignment: data.protected ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                  children: data.protected ? buildProtectedThumbnail(context) : buildThumbnail(context)
                 )
               ],
             ),

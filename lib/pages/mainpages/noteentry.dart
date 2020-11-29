@@ -415,7 +415,7 @@ class _NoteEntry extends State<NoteEntry> {
                 // final int to = (newPosition as ValueKey).value;
 
                 final _draggedItem = widget.model.data[from];
-                print('$from -> $to');
+                // print('$from -> $to');
                 setState(() {
                   widget.model.data.removeAt(from);
                   widget.model.data.insert(to, _draggedItem);
@@ -443,17 +443,69 @@ class _NoteEntry extends State<NoteEntry> {
                                       await saveNote();
                                   },
                                 ),
-                                Text(
-                                  'Editing',
-                                  style: Theme.of(context).textTheme.subtitle1,
-                                ),
                                 RoundButton(
-                                  child: Icon(Icons.shuffle),
-                                  onPressed: () { 
-                                    setState(() {
-                                      widget.entryMode = widget.entryMode == NoteEntryMode.ReorderMode ? 
-                                        NoteEntryMode.EditMode : NoteEntryMode.ReorderMode;
-                                    });
+                                  child: Icon(MaterialIcons.more_vert),
+                                  onPressed: () async { 
+                                    var t = await showMenu(
+                                      context: context, 
+                                      position: RelativeRect.fromLTRB(10000, 42, 0, 0), 
+                                      items: [
+                                        PopupMenuItem(
+                                          child: Row(
+                                            children: [
+                                              Icon(widget.model.protected ? Icons.lock_open : Icons.lock_outline, size: 18,),
+                                              const SizedBox(width: 5,),
+                                              Padding(
+                                                padding: EdgeInsets.only(top: 2),
+                                                child: Text(
+                                                  !widget.model.protected ? 
+                                                    'Protect' : 'Remove protection',
+                                                )
+                                              )
+                                            ],
+                                          ),
+                                          value: 'protect',
+                                        ),
+                                        PopupMenuItem(
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.archive, size: 18,),
+                                              const SizedBox(width: 5,),
+                                              Padding(
+                                                padding: EdgeInsets.only(top: 2),
+                                                child: Text(
+                                                  'Archive',
+                                                )
+                                              )
+                                            ],
+                                          ),
+                                          value: 'archived',
+                                        ),
+                                        PopupMenuItem(
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.delete_outline, size: 18,),
+                                              const SizedBox(width: 5,),
+                                              Padding(
+                                                padding: EdgeInsets.only(top: 2),
+                                                child: Text(
+                                                  'Delete',
+                                                )
+                                              )
+                                            ],
+                                          ),
+                                          value: 'delete',
+                                        ),
+                                      ],
+                                    );
+
+                                    switch (t) {
+                                      case 'protect':
+                                        widget.model.protected = !widget.model.protected;
+                                        await saveNote();
+                                        break;
+                                    }
+                                    print(t);
                                   },
                                 )
                               ],
@@ -465,50 +517,58 @@ class _NoteEntry extends State<NoteEntry> {
 
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) {                  
+                        (context, index) {
+                          final int size = (2 * widget.model.data.length - 1);
+
                           if (index == 0) return _buildTopBar(context);
-                          if (index >= 1 && index <= widget.model.data.length) 
-                            return ReorderableItem(
-                              key: ValueKey(widget.model.data[index - 1].id),
-                              childBuilder: (context, reorderState) => Opacity(
-                                opacity: reorderState == ReorderableItemState.placeholder ? 0 : 1,
-                                child: Dismissible(
-                                  key: UniqueKey(),
-                                  direction: DismissDirection.startToEnd,
-                                  onDismissed: (direction) {
-                                    setState(() => widget.model.data.removeAt(index - 1));
-                                  },
+                          
+                          if (index >= 1 && index <= (2 * widget.model.data.length) - 1) {
+                            int _id = (index - 1) ~/ 2;
+                            if ((index - 1) % 2 == 0) return ReorderableItem(
+                                key: ValueKey(widget.model.data[_id].id),
+                                childBuilder: (context, reorderState) => Opacity(
+                                  opacity: reorderState == ReorderableItemState.placeholder ? 0 : 1,
+                                  child: Dismissible(
+                                    key: UniqueKey(),
+                                    direction: DismissDirection.startToEnd,
+                                    onDismissed: (direction) {
+                                      setState(() => widget.model.data.removeAt(_id));
+                                    },
 
-                                  background: Container(
-                                    color: Colors.red.shade400,
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 2.0, left: 10, right: 4),
-                                          child: const Icon(Feather.trash, color: Colors.white, size: 16),
-                                        ),
-                                        const Text('Delete', style: TextStyle(color: Colors.white, fontSize: 15),)
-                                      ],
+                                    background: Container(
+                                      color: Colors.red.shade400,
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(bottom: 2.0, left: 10, right: 4),
+                                            child: const Icon(Feather.trash, color: Colors.white, size: 16),
+                                          ),
+                                          const Text('Delete', style: TextStyle(color: Colors.white, fontSize: 15),)
+                                        ],
+                                      ),
                                     ),
-                                  ),
 
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 7, right: 10),
-                                    child: Row(
-                                      children: [
-                                        ReorderableListener(
-                                          child: Icon(Icons.drag_handle),
-                                        ),
-                                        Expanded(child: _buildListChild(context, index - 1)),
-                                      ],
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 7, right: 10),
+                                      child: Row(
+                                        children: [
+                                          ReorderableListener(
+                                            child: Icon(MaterialCommunityIcons.drag),
+                                          ),
+                                          Expanded(child: _buildListChild(context, _id)),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          return const SizedBox(height: 50); // end padding
+                              );
+                            else return Divider(thickness: 0, color: Theme.of(context).dividerColor.withAlpha(10));
+                          }
+                          
+                          return const SizedBox(height: 60); // end padding
                         },
-                        childCount: widget.model.data.length + 2,
+
+                        childCount: 1 + (2 * widget.model.data.length - 1) + 1,
                       )
                     )
                   )
@@ -617,78 +677,6 @@ class _NoteEntry extends State<NoteEntry> {
                 ),
               )
             ),
-
-            Positioned(
-              right: 0,
-              bottom: 0,
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  PopupMenuButton(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'protect':
-                          setState(() {
-                            widget.model.protected = !widget.model.protected;
-                          });
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        child: Row(
-                          children: [
-                            Icon(widget.model.protected ? Icons.lock_open : Icons.lock_outline, size: 18,),
-                            const SizedBox(width: 5,),
-                            Padding(
-                              padding: EdgeInsets.only(top: 2),
-                              child: Text(
-                                !widget.model.protected ? 
-                                  'Protect' : 'Remove protection',
-                              )
-                            )
-                          ],
-                        ),
-                        value: 'protect',
-                      ),
-                      PopupMenuItem(
-                        child: Row(
-                          children: [
-                            Icon(Icons.archive, size: 18,),
-                            const SizedBox(width: 5,),
-                            Padding(
-                              padding: EdgeInsets.only(top: 2),
-                              child: Text(
-                                'Archive',
-                              )
-                            )
-                          ],
-                        ),
-                        value: 'archived',
-                      ),
-                      PopupMenuItem(
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete_outline, size: 18,),
-                            const SizedBox(width: 5,),
-                            Padding(
-                              padding: EdgeInsets.only(top: 2),
-                              child: Text(
-                                'Delete',
-                              )
-                            )
-                          ],
-                        ),
-                        value: 'delete',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 5),   
-                ],
-              ),
-            )       
           ]
         )
       ),

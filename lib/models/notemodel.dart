@@ -21,6 +21,10 @@ class NoteModel {
   //  {
   //     'id' : <number>,
   //     'title' : '<text>',
+  //     'archived' : '<bool>,
+  //     'protected' : '<bool>,
+  //     'createdOn' : <date>,
+  //     'updatedOn' : <date>,
   //     'data' : [
   //        {
   //           'type' : 'text' or 'checklist',

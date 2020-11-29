@@ -47,7 +47,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       top: 20,
       left: _state.selecting ? 0 : 20,
 
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 100),
       curve: Curves.easeOutCubic,
 
       child: Text(
@@ -106,6 +106,21 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
               _state.clearSelection();
             },
             child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Transform.rotate(
+                angle: 25 * 3.14159 / 180,
+                child: Icon(MaterialCommunityIcons.pin_outline, size: 20,)
+              ),
+            ),
+          ),
+          const SizedBox(width: 10,),
+          RoundButton(
+            onPressed: () async {
+              for (int id in _state.selection)
+                BlocProvider.of<NoteBloc>(context).add( NoteEvent.moveToArchived( id ) );
+              _state.clearSelection();
+            },
+            child: Padding(
               padding: const EdgeInsets.all(4),
               child: Icon(Feather.archive, size: 17,),
             ),
@@ -136,7 +151,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       top: 25,
       right: _state.selecting ? 0 : 15,
 
-      duration: Duration(milliseconds: 100),
+      duration: Duration(milliseconds: _state.selecting ? 50 : 100),
       curve: Curves.easeOutCubic,
 
       child: RoundButton(
@@ -217,6 +232,42 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget buildStaggeredGridView(int topicKey) => 
+    BlocConsumer<NoteBloc, NoteState>(
+      listener: (_, __) {},
+      builder: (cxt, noteList) {
+        return StreamBuilder(
+          stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
+          builder: (context, snapshot) {
+            // print(snapshot.data.length);
+            return ((snapshot.data?.length ?? 0) == 0) ?
+            Center(
+              child: Opacity(
+                opacity: 0.4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.folder_open, size: 40),
+                    Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
+                  ],
+                ),
+              ),
+            )
+          : StaggeredGridView.countBuilder(
+            padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+
+            itemCount: snapshot.data?.length ?? 0,
+            staggeredTileBuilder: (index) => StaggeredTile.fit(1),
+            itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
+          );
+          },
+        );
+      }
+    );
 
   @override
   Widget build(BuildContext context) {
@@ -317,40 +368,4 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       ),
     );
   }
-
-  Widget buildStaggeredGridView(int topicKey) => 
-    BlocConsumer<NoteBloc, NoteState>(
-      listener: (_, __) {},
-      builder: (cxt, noteList) {
-        return StreamBuilder(
-          stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
-          builder: (context, snapshot) {
-            // print(snapshot.data.length);
-            return ((snapshot.data?.length ?? 0) == 0) ?
-            Center(
-              child: Opacity(
-                opacity: 0.4,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.folder_open, size: 40),
-                    Text('Nothing here', style: Theme.of(context).textTheme.headline6,),
-                  ],
-                ),
-              ),
-            )
-          : StaggeredGridView.countBuilder(
-            padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-            crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-
-            itemCount: snapshot.data?.length ?? 0,
-            staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-            itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
-          );
-          },
-        );
-      }
-    );
 }
