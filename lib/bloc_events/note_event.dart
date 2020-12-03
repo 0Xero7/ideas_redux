@@ -6,7 +6,9 @@ enum EventType {
   deleteWithID,
   update,
   moveToArchived,
-  unarchive
+  unarchive,
+  pin,
+  unpin
 }
 
 class NoteEvent {
@@ -37,5 +39,13 @@ class NoteEvent {
 
   NoteEvent.unarchive(this.noteId) {
     eventType = EventType.unarchive;
+  }
+
+  NoteEvent.pin(this.noteId) {
+    eventType = EventType.pin;
+  }
+
+  NoteEvent.unpin(this.noteId) {
+    eventType = EventType.unpin;
   }
 }

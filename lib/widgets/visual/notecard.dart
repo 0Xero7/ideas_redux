@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
 import 'package:flutter/material.dart';
@@ -145,9 +146,9 @@ class NoteCard extends StatelessWidget {
               return; 
             }
 
-            _state.toggleSelection(data.id);
+            _state.toggleSelection(data.id, data.pinned);
           },
-          onLongPress: () => _state.addToSelection(data.id),
+          onLongPress: () => _state.addToSelection(data.id, data.pinned),
 
           borderRadius: BorderRadius.circular(5),
 
@@ -156,7 +157,13 @@ class NoteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: data.protected ? CrossAxisAlignment.center : CrossAxisAlignment.start,
               children: [
-                Text('${data.title}', style: Theme.of(context).textTheme.headline6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('${data.title}', style: Theme.of(context).textTheme.headline6),
+                    data.pinned ? Icon(MaterialCommunityIcons.pin, size: 15) : Container()
+                  ],
+                ),
                 Opacity(
                   opacity: 0.75,
                   child: Text(_calculateTimeDelta(data.updatedOn), style: Theme.of(context).textTheme.caption)

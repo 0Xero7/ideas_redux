@@ -87,6 +87,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
   
   Widget _buildSelectionMenuRight(BuildContext ctx) {
     final SelectionState _state = Provider.of<SelectionState>(ctx);
+    print(_state.pinnedParityPreserved);
     
     return AnimatedPosOp(
       hidden: !_state.selecting,
@@ -100,16 +101,21 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       child: Row(
         children: [
           RoundButton(
+            disabled: !_state.pinnedParityPreserved,
             onPressed: () async {
-              for (int id in _state.selection)
-                BlocProvider.of<NoteBloc>(context).add( NoteEvent.moveToArchived( id ) );
+              for (int id in _state.selection) {
+                BlocProvider.of<NoteBloc>(context).add(
+                  _state.pinned == 0 ? NoteEvent.pin( id ) : NoteEvent.unpin( id ) );
+              }
               _state.clearSelection();
             },
             child: Padding(
               padding: const EdgeInsets.all(3),
               child: Transform.rotate(
                 angle: 25 * 3.14159 / 180,
-                child: Icon(MaterialCommunityIcons.pin_outline, size: 20,)
+                child: Icon(_state.pinned == 0 ? 
+                  MaterialCommunityIcons.pin_outline :
+                  MaterialCommunityIcons.pin_off_outline, size: 20,)
               ),
             ),
           ),
@@ -167,6 +173,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
   }
 
   String _searchString = "";
+
   Stream<List<int>> _getFilteredTopicNotes(BuildContext context, NoteState state, int topicId, String searchString) async* {
     var res = new List<int>();
 

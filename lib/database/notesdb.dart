@@ -44,7 +44,7 @@ class NotesDB {
     var store = intMapStoreFactory.store();
 
     var finder = Finder(
-      filter: Filter.equals('pinned', false),
+      // filter: Filter.equals('pinned', false),
       sortOrders: [ SortOrder('updatedOn', false) ]
     );
 
@@ -114,5 +114,23 @@ class NotesDB {
   static Future unarchive(NoteModel note) async {
     note.isArchived = false;
     await updateNote(note);
+  }
+
+  static Future pinNote(NoteModel note) async {
+    note.pinned = true;
+    
+    var store = intMapStoreFactory.store();
+    var record = store.record(note.id);
+
+    await record.put(db, {'pinned': true}, merge: true);
+  }
+
+  static Future unpinNote(NoteModel note) async {
+    note.pinned = false;
+    
+    var store = intMapStoreFactory.store();
+    var record = store.record(note.id);
+
+    await record.put(db, {'pinned': false}, merge: true);
   }
 }

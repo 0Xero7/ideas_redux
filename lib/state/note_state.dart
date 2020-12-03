@@ -30,6 +30,8 @@ class NoteState {
   void _addNoteToCategory(NoteModel note) {
     notesInCategory[note.topicId] ??= List<int>();
     notesInCategory[note.topicId].add(note.id);
+    
+    orderCategory(note.topicId);
   }
 
   void addNote(NoteModel model) {
@@ -44,6 +46,8 @@ class NoteState {
     } else {
       notesInCategory[model.topicId] ??= List<int>();
       notesInCategory[model.topicId].add(model.id);
+
+      orderCategory(model.topicId);
     }
   }
 
@@ -93,6 +97,20 @@ class NoteState {
     _addNoteToCategory(note);
   }
 
+  void pinNoteWithId(int id) {
+    assert(noteRef.containsKey(id));
+
+    noteRef[id].pinned = true;
+    orderCategory(noteRef[id].topicId);
+  }
+
+  void unpinNoteWithId(int id) {
+    assert(noteRef.containsKey(id));
+
+    noteRef[id].pinned = false;
+    orderCategory(noteRef[id].topicId);
+  }
+
   // updating archived notes is not allowed
   void updateNote(NoteModel oldModel, NoteModel newModel) {
     assert(oldModel.id == newModel.id);
@@ -100,6 +118,17 @@ class NoteState {
 
     notesInCategory[oldModel.topicId].removeWhere((key) => key == oldModel.id);
     _addNoteToCategory(newModel);
+  }
+
+  void orderCategory(int categoryId) {
+      notesInCategory[categoryId].sort((a, b) {
+        if ((noteRef[a].pinned && noteRef[b].pinned) || (!noteRef[a].pinned && !noteRef[b].pinned))
+          return noteRef[b].updatedOn - noteRef[a].updatedOn;
+        else {
+          if (noteRef[a].pinned) return -1;
+          return 1;
+        }
+      });
   }
 
   void debug() {

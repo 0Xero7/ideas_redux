@@ -128,6 +128,26 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         yield newState;
         break;
 
+      case EventType.pin:
+        NoteState newState = NoteState.from(state);
+        final _note = newState.noteRef[event.noteId];
+
+        await NotesDB.pinNote(_note);
+        newState.pinNoteWithId(_note.id);
+
+        yield newState;
+        break;
+
+      case EventType.unpin:
+        NoteState newState = NoteState.from(state);
+        final _note = newState.noteRef[event.noteId];
+
+        await NotesDB.unpinNote(_note);
+        newState.unpinNoteWithId(_note.id);
+
+        yield newState;
+        break;
+
 
       default: throw Exception('Event ${event.eventType}  found');
     }

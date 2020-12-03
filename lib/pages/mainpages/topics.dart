@@ -324,7 +324,7 @@ class _Topics extends State<Topics> {
                                       childBuilder: (context, reorder_state) => MaterialButton(
                                         padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
                                         
-                                        onPressed: () { _selection.toggleSelection(snapshot.data[id]); },
+                                        onPressed: () { _selection.toggleSelection(snapshot.data[id], snapshot.data[id].pinned); },
                                         child: Align(
                                           alignment: Alignment.topLeft,
                                           child: Row(
@@ -378,7 +378,7 @@ class _Topics extends State<Topics> {
                         itemBuilder: (_, id) => MaterialButton(
                           padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
                           
-                          onPressed: () { _selection.toggleSelection(snapshot.data[id]); },
+                          onPressed: () { _selection.toggleSelection(snapshot.data[id], snapshot.data[id].pinned); },
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Row(
