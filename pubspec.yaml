@@ -43,6 +43,7 @@ dependencies:
   flutter_sticky_header: ^0.4.5
   flutter_icons: ^1.1.0
   image_picker: ^0.6.7+4
+  sembast: ^2.4.8
 
 dev_dependencies:
   flutter_test:

@@ -11,6 +11,10 @@ class NoteModel {
   List<BaseDataModel> data;
   bool isArchived;
   bool protected;
+  bool pinned;
+
+  int createdOn;
+  int updatedOn;
   
   String encryptedData;
   String randomId; // for secure key storage
@@ -23,6 +27,7 @@ class NoteModel {
   //     'title' : '<text>',
   //     'archived' : '<bool>,
   //     'protected' : '<bool>,
+  //     'pinned' : '<bool>',
   //     'createdOn' : <date>,
   //     'updatedOn' : <date>,
   //     'data' : [
@@ -41,6 +46,9 @@ class NoteModel {
     data.add(TextDataModel(null));
     isArchived = false;
     protected = false;
+    pinned = false;
+
+    createdOn = updatedOn = 0;    
 
     randomId = randomString(12);
   }
@@ -53,6 +61,10 @@ class NoteModel {
     this.isArchived = model.isArchived;
     this.protected = model.protected;
     this.randomId = model.randomId;
+    this.pinned = model.pinned;
+
+    this.createdOn = model.createdOn;
+    this.updatedOn = model.updatedOn;
   }
 
   factory NoteModel.fromMap(Map<String, dynamic> arg) {
@@ -63,7 +75,11 @@ class NoteModel {
     model.title = arg['title'];
     model.isArchived = arg['archived'] ?? false;
     model.protected = arg['protected'] ?? false;
+    model.pinned = arg['pinned'] ?? false;
     model.randomId = arg['randomid'];
+
+    model.createdOn = arg['createdOn'];
+    model.updatedOn = arg['updatedOn'];
 
     if (!model.protected) { // unprotected data
       for (var i in arg['data']) {
@@ -137,6 +153,10 @@ class NoteModel {
     res['archived'] = isArchived;
     res['protected'] = protected ?? false;
     res['randomid'] = randomId;
+    res['pinned'] = pinned;
+
+    res['createdOn'] = createdOn;
+    res['updatedOn'] = updatedOn;
 
     if (!protected) res['data'] = getDataAsJson();
     else res['data'] = encryptedData;

@@ -51,8 +51,15 @@ class _NoteEntry extends State<NoteEntry> {
     if (widget.model.title == null || widget.model.title.trim() == '') return;
     if (widget.model.data == null || widget.model.data.length == 0) return;
 
-    if (widget.model.id == -1) BlocProvider.of<NoteBloc>(context).add( NoteEvent.addNote(widget.model) );
-    else BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(widget.oldModel, widget.model) );
+    widget.model.updatedOn = DateTime.now().millisecondsSinceEpoch;
+
+    if (widget.model.id == -1) {
+      widget.model.createdOn = widget.model.updatedOn;
+      BlocProvider.of<NoteBloc>(context).add( NoteEvent.addNote(widget.model) );
+    }
+    else {
+      BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(widget.oldModel, widget.model) );
+    }
   }
 
 

@@ -98,6 +98,17 @@ class NoteCard extends StatelessWidget {
     return res;
   }
 
+  String _calculateTimeDelta(int updateTime) {
+    var ut = DateTime.fromMillisecondsSinceEpoch(updateTime);
+    var ct = DateTime.now();
+
+    var days = ct.difference(ut).inDays;
+
+    if (days == 0) return "Today";
+    else if (days == 1) return "1 day ago";
+    else return "$days days ago";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SelectionState>(
@@ -148,7 +159,7 @@ class NoteCard extends StatelessWidget {
                 Text('${data.title}', style: Theme.of(context).textTheme.headline6),
                 Opacity(
                   opacity: 0.75,
-                  child: Text('${3} days ago', style: Theme.of(context).textTheme.caption)
+                  child: Text(_calculateTimeDelta(data.updatedOn), style: Theme.of(context).textTheme.caption)
                 ),
                 const SizedBox(height: 10), 
 
