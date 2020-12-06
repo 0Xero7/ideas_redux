@@ -45,7 +45,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       hidden: true,
       opacity: _state.selecting ? 0 : 1,
       top: 20,
-      left: _state.selecting ? 0 : 20,
+      left: _state.selecting ? 0 : 18,
 
       duration: Duration(milliseconds: 100),
       curve: Curves.easeOutCubic,
@@ -74,10 +74,11 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
           Back(
             popRoute: false,
             onPressed: () => _state.clearSelection(),
+            closeIcon: true,
           ),
           const SizedBox(width: 10),
           Text(
-            '${_state.selection.length} notes selected',
+            '${_state.selection.length}',
             style: Theme.of(context).textTheme.headline6,
           ),
         ],
@@ -321,7 +322,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
 
 
             AnimatedPositioned(
-              top: searching ? 130 : 80,
+              top: searching ? 130 : 77,
               left: 0,
               right: 0,
               bottom: 0,
@@ -345,7 +346,9 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
                         child: TabBar(
                           controller: _tabController,
                           isScrollable: true, 
-                          indicatorPadding: EdgeInsets.all(5),
+                          indicatorPadding: EdgeInsets.only(
+                            left: 5, right: 5, bottom: 3
+                          ),
 
                           tabs: List.generate(
                             state.topics.length, 

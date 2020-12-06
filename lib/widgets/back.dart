@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class Back extends StatelessWidget {
   Function onPressed;
+  bool closeIcon;
   bool popRoute;
-  Back({this.onPressed, this.popRoute = true});
+  Back({this.onPressed, this.popRoute = true, this.closeIcon = false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class Back extends StatelessWidget {
 
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Icon(Icons.arrow_back),
+          child: Icon(closeIcon ? Icons.close : Icons.arrow_back),
         ),
       ),
     );   

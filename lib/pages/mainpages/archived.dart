@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
@@ -56,10 +57,11 @@ class _Archived extends State<Archived> {
           Back(
             popRoute: false,
             onPressed: () => _state.clearSelection(),
+            closeIcon: true,
           ),
           const SizedBox(width: 10),
           Text(
-            '${_state.selection.length} notes selected',
+            '${_state.selection.length}',
             style: Theme.of(context).textTheme.headline6,
           ),
         ],
@@ -87,7 +89,10 @@ class _Archived extends State<Archived> {
                 BlocProvider.of<NoteBloc>(context).add( NoteEvent.unarchive( id ) );
               _state.clearSelection();
             },
-            child: Icon(Icons.archive, color: Colors.black87,),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Icon(Feather.archive, size: 17,),
+            ),
           ),
           const SizedBox(width: 10,),
           RoundButton(
@@ -96,7 +101,10 @@ class _Archived extends State<Archived> {
                 BlocProvider.of<NoteBloc>(context).add( NoteEvent.deleteNoteWithID(id) );
               _state.clearSelection();
             },
-            child: Icon(Icons.delete, color: Colors.red.shade400),
+            child: Padding(
+              padding: const EdgeInsets.all(3.5),
+              child: Icon(Feather.trash, size: 18, color: Colors.red.shade400,),
+            ),
           ),
         ],
       ),

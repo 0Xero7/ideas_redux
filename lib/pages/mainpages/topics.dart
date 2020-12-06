@@ -89,10 +89,11 @@ class _Topics extends State<Topics> {
           Back(
             popRoute: false,
             onPressed: () => _state.clearSelection(),
+            closeIcon: true,
           ),
           const SizedBox(width: 10),
           Text(
-            '${_state.selection.length} notes selected',
+            '${_state.selection.length}',
             style: Theme.of(context).textTheme.headline6,
           ),
         ],
@@ -367,35 +368,35 @@ class _Topics extends State<Topics> {
                         );
                         
                         
-                        return ListView.separated(
-                        separatorBuilder: (context, index) => Divider(
-                          height: 0, thickness: 0,
-                          indent: 10,
-                          endIndent: 10,
-                        ),
+                      //   return ListView.separated(
+                      //   separatorBuilder: (context, index) => Divider(
+                      //     height: 0, thickness: 0,
+                      //     indent: 10,
+                      //     endIndent: 10,
+                      //   ),
 
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (_, id) => MaterialButton(
-                          padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
+                      //   itemCount: snapshot.data.length,
+                      //   itemBuilder: (_, id) => MaterialButton(
+                      //     padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
                           
-                          onPressed: () { _selection.toggleSelection(snapshot.data[id], false); },
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
-                                const SizedBox(width: 5),
-                                Text( 
-                                  state.topics[snapshot.data[id]].topicName ?? "", 
-                                  textAlign: TextAlign.start,
-                                  style: Theme.of(context).textTheme.subtitle1
-                                ),
-                              ],
-                            )
-                          ),
-                        )
-                      );
+                      //     onPressed: () { _selection.toggleSelection(snapshot.data[id], false); },
+                      //     child: Align(
+                      //       alignment: Alignment.topLeft,
+                      //       child: Row(
+                      //         mainAxisSize: MainAxisSize.min,
+                      //         children: [
+                      //           Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
+                      //           const SizedBox(width: 5),
+                      //           Text( 
+                      //             state.topics[snapshot.data[id]].topicName ?? "", 
+                      //             textAlign: TextAlign.start,
+                      //             style: Theme.of(context).textTheme.subtitle1
+                      //           ),
+                      //         ],
+                      //       )
+                      //     ),
+                      //   )
+                      // );
                       },
                     );
                   }
