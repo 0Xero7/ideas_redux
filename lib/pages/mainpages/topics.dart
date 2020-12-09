@@ -195,7 +195,8 @@ class _Topics extends State<Topics> {
                   );
 
                   if (_rename != null) {
-                    BlocProvider.of<TopicBloc>(context).add( TopicEvent.updateTopic( TopicModel(_selectedID, _rename) ) );
+                    // TODO: fix order to order before
+                    BlocProvider.of<TopicBloc>(context).add( TopicEvent.updateTopic( TopicModel(_selectedID, _rename, 10) ) );
                     _state.clearSelection();
                   }
 

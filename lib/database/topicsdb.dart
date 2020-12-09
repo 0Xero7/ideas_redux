@@ -15,7 +15,7 @@ class TopicsDB {
     // await Hive.deleteBoxFromDisk("topics");
     _topicBox = await Hive.openBox<String>("topics");
     if (!_topicBox.containsKey(1)) {
-      var _topic = TopicModel(1, 'Other');
+      var _topic = TopicModel(1, 'Other', 0);
       await updateTopic(_topic);
     }
   }

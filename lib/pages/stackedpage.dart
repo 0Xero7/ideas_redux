@@ -183,7 +183,7 @@ class _StackedPageState extends State<StackedPage> {
                 var res = await showTextDialog(context, () { changeAppState(AppState.atTopics); });
 
                 if (res != null)
-                  BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res) ) );
+                  BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res, 10) ) );
                 break;
             }
           },
