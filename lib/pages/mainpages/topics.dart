@@ -1,10 +1,12 @@
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart' as reoderable;
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
+import 'package:ideas_redux/bloc_events/note_event.dart';
 import 'package:ideas_redux/bloc_events/topic_event.dart';
+import 'package:ideas_redux/models/notemodel.dart';
 import 'package:ideas_redux/models/topicmodel.dart';
 import 'package:ideas_redux/state/selection_state.dart';
 import 'package:ideas_redux/state/topic_state.dart';
@@ -126,11 +128,36 @@ class _Topics extends State<Topics> {
           // const SizedBox(width: 10,),
           RoundButton(
             onPressed: () async {
+              if (_state.selection.contains(1)) {
+                var _otherName = BlocProvider.of<TopicBloc>(context).state.topics[1].topicName;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Cannot delete the "$_otherName" topic.'),
+                    behavior: SnackBarBehavior.floating,
+                    duration: Duration(seconds: 2, milliseconds: 500),
+                  )
+                );
+                return;
+              }
+
               var res = await _deleteTopicsConfirm(context, _state);
 
               if (res != null && res) {
-                for (var id in _state.selection)
+                var _notes = BlocProvider.of<NoteBloc>(context).state;
+                
+                for (var id in _state.selection) {
+                  if (_notes.notesInCategory[id] != null) {
+                    for (var _id in _notes.notesInCategory[id]) {
+                      var newNote = NoteModel.from( _notes.noteRef[_id] );
+                      newNote.topicId = 1;
+
+                      BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(_notes.noteRef[_id], newNote) );
+                    }
+                  }
+
                   BlocProvider.of<TopicBloc>(context).add( TopicEvent.deleteTopicWithID(id) );
+                }
+                BlocProvider.of<TopicBloc>(context).add( TopicEvent.fixOrdering() );
 
                 _state.clearSelection();
               }
@@ -211,13 +238,12 @@ class _Topics extends State<Topics> {
   } 
 
   Stream<List<int>> someStream(BuildContext context, String searchString) async* {
-    List<int> res = List<int>();
+    List<int> res = [];
     final state = BlocProvider.of<TopicBloc>(context).state;
 
-    for (var i in state.topics.values) {
-      if (i.topicName.toLowerCase().contains(searchString)) {
-        res.add(i.id);
-        yield res;
+    for (int i = 0; i < state.topics.length; ++i) {
+      if (state.topics[state.topicList[i]].topicName.toLowerCase().contains(searchString)) {
+        res.add(state.topicList[i]);
       }
     }
 
@@ -305,100 +331,94 @@ class _Topics extends State<Topics> {
                 child: BlocBuilder<TopicBloc, TopicState>(
                   builder: (context, state) { 
                     final _selection = Provider.of<SelectionState>(context);
-                    
-                    return StreamBuilder(
-                      stream: someStream(context, s),
-                      builder: (context, snapshot) {
-                        return ReorderableList(
-                          onReorder: (draggedItem, newPosition) { 
-                            var _old = draggedItem as ValueKey;
-                            var _new = draggedItem as ValueKey;
-                            // print(_old.toString() + "," + _new.toString());
-                            return true;
-                          },
-                          child: CustomScrollView(
-                            slivers: [
-                              SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, id) {
-                                    return ReorderableItem(
-                                      key: ValueKey(id),
-                                      childBuilder: (context, reorder_state) => MaterialButton(
-                                        padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
-                                        
-                                        onPressed: () { _selection.toggleSelection(snapshot.data[id], false); },
-                                        child: Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
-                                              const SizedBox(width: 5),
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: 2),
-                                                child: Text( 
-                                                  state.topics[snapshot.data[id]].topicName ?? "", 
-                                                  textAlign: TextAlign.start,
-                                                  style: Theme.of(context).textTheme.subtitle1
-                                                ),
-                                              ),
+                    final state = BlocProvider.of<TopicBloc>(context).state;
 
-                                              // TODO: Implement reorder later.
-                                              // %%%% IT'S HARD %%%%
-                                              // Expanded(
-                                              //   child: Align(
-                                              //     alignment: Alignment.centerRight,
-                                              //     child: ReorderableListener(
-                                              //       child: Container(
-                                              //         child: Icon(Icons.drag_handle),
-                                              //       ),
-                                              //     ),
-                                              //   ),
-                                              // )
-                                            ],
-                                          )
-                                        ),
-                                      )
-                                    );
-                                  },
-                                  childCount: snapshot.data.length,
-                                ),
-                              )
-                            ],
-                          )
-                        );
-                        
-                        
-                      //   return ListView.separated(
-                      //   separatorBuilder: (context, index) => Divider(
-                      //     height: 0, thickness: 0,
-                      //     indent: 10,
-                      //     endIndent: 10,
-                      //   ),
+                    var lst = state.topicList;
 
-                      //   itemCount: snapshot.data.length,
-                      //   itemBuilder: (_, id) => MaterialButton(
-                      //     padding: EdgeInsets.symmetric(horizontal: 17, vertical: 17),
-                          
-                      //     onPressed: () { _selection.toggleSelection(snapshot.data[id], false); },
-                      //     child: Align(
-                      //       alignment: Alignment.topLeft,
-                      //       child: Row(
-                      //         mainAxisSize: MainAxisSize.min,
-                      //         children: [
-                      //           Icon( _selection.contains(snapshot.data[id]) ? Icons.check_box : Icons.check_box_outline_blank),
-                      //           const SizedBox(width: 5),
-                      //           Text( 
-                      //             state.topics[snapshot.data[id]].topicName ?? "", 
-                      //             textAlign: TextAlign.start,
-                      //             style: Theme.of(context).textTheme.subtitle1
-                      //           ),
-                      //         ],
-                      //       )
-                      //     ),
-                      //   )
-                      // );
+                    return reoderable.ReorderableList(
+                      onReorderDone: (_) {
+                        BlocProvider.of<TopicBloc>(context).add(
+                          TopicEvent.reorder());
                       },
+                      onReorder: (draggedItem, newPosition) { 
+                        var _old = draggedItem as ValueKey;
+                        var _new = newPosition as ValueKey;
+
+                        int from = state.topicList.indexWhere((element) => element == _old.value);
+                        int to = state.topicList.indexWhere((element) => element == _new.value);
+
+                        if (from == to) return true;
+
+                        int oldVal = state.topicList[from];
+                        var tempList = List<int>();
+                        int originalId = state.topicList[from];
+
+                        for (int i = 0; i < state.topics.length; ++i) tempList.add(state.topicList[i]);
+                        tempList.removeAt(from);
+                        tempList.insert(to, originalId);
+
+                        var _t = List<int>(32);
+                        for (int i = 0; i < state.topics.length; ++i) {
+                          _t[i] = tempList[i];
+                        }
+
+                        setState(() {
+                          lst = _t;
+                          state.topicList = lst;
+                        });
+
+
+                        // BlocProvider.of<TopicBloc>(context).add(
+                        //   TopicEvent.reorder(from, to));
+
+                        return true;
+                      },
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, idx) {
+                                return reoderable.ReorderableItem(
+                                  key: ValueKey(lst[idx]),
+                                  childBuilder: (context, reorderState) => Opacity(
+                                    opacity: reorderState == reoderable.ReorderableItemState.placeholder ? 0 : 1,
+                                    child: MaterialButton(
+                                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 17),
+                                      
+                                      onPressed: () { _selection.toggleSelection(lst[idx], false); },
+                                      child: Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              flex: 0,
+                                              child: reoderable.ReorderableListener(
+                                                child: Icon(MaterialCommunityIcons.drag_vertical),
+                                              ),
+                                            ),
+                                            Icon( _selection.contains(lst[idx]) ? Icons.check_box : Icons.check_box_outline_blank),
+                                            const SizedBox(width: 5),
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 2),
+                                              child: Text( 
+                                                state.topics[lst[idx]].topicName ?? "", 
+                                                textAlign: TextAlign.start,
+                                                style: Theme.of(context).textTheme.subtitle1
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ),
+                                    ),
+                                  )
+                                );
+                              },
+                              childCount: state.topics.length,
+                            ),
+                          )
+                        ],
+                      )
                     );
                   }
                 )

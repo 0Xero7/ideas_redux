@@ -38,11 +38,13 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.ideas_redux"
+        applicationId "com.appsbyxero.inscribe"
         minSdkVersion 19
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        
+        ndk { abiFilters "armeabi", "x86", "armeabi-v7a","x86_64", "mips", "mips64", "arm64-v8a" }
     }
 
     buildTypes {

@@ -1,6 +1,7 @@
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ideas_redux/activeTopicBookkeeper.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
 import 'package:ideas_redux/bloc_events/topic_event.dart';
 import 'package:ideas_redux/models/notemodel.dart';
@@ -27,8 +28,15 @@ enum AppState {
 }
 
 class _StackedPageState extends State<StackedPage> {
-  int currentIndex = 0;
+  int currentIndex;
   AppState _appState = AppState.atNotes;
+
+  @override
+  void initState() {
+    super.initState();
+
+    currentIndex = 0;
+  }
 
   void changeAppState(AppState newState) {
     switch (newState) {
@@ -176,14 +184,17 @@ class _StackedPageState extends State<StackedPage> {
             switch (currentIndex) {
               case 0:
                 final _state = BlocProvider.of<TopicBloc>(context).state.topics.keys.first;
-                Navigator.pushNamed(context, '/editentry', arguments: NoteModel.empty(_state)); 
+                print(ActiveTopic.activeTopicIndex);
+                Navigator.pushNamed(context, '/editentry', arguments: 
+                  NoteModel.empty(ActiveTopic.activeTopicIndex),
+                ); 
                 break;
               case 1:
                 changeAppState(AppState.addingTopic);
                 var res = await showTextDialog(context, () { changeAppState(AppState.atTopics); });
 
                 if (res != null)
-                  BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res, 10) ) );
+                  BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res, -1) ) );
                 break;
             }
           },

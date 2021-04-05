@@ -15,6 +15,7 @@ class TopicBloc extends Bloc<TopicEvent, TopicState> {
   Stream<TopicState> mapEventToState(TopicEvent event) async* {
     switch (event.type) {
       case TopicEventType.add:
+        event.topic.order = state.topics.length;
         await TopicsDB.addTopic(event.topic);
 
         TopicState newState = TopicState.from(state);
@@ -28,6 +29,7 @@ class TopicBloc extends Bloc<TopicEvent, TopicState> {
 
         TopicState newState = TopicState.from(state);
         newState.deleteTopic(event.topidId);
+        
         yield newState;
         break;
 
@@ -37,6 +39,26 @@ class TopicBloc extends Bloc<TopicEvent, TopicState> {
         TopicState newState = TopicState.from(state);
         newState.updateTopic(event.topic);
         yield newState;
+        break;
+
+      case TopicEventType.reorder:
+        TopicState newState = TopicState.from(state);
+        newState.updateOrdering();
+        yield newState;
+
+        await TopicsDB.rewriteAll(newState.topics);
+
+        // await TopicsDB.updateTopic(event.topic);
+        // await TopicsDB.updateTopic(event.otherTopic);
+
+        break;
+
+      case TopicEventType.fixOrder:
+        TopicState newState = TopicState.from(state);
+        newState.fixOrdering();
+        yield newState;
+
+        await TopicsDB.rewriteAll(newState.topics);
         break;
 
       default: 

@@ -116,6 +116,7 @@ class NoteState {
     assert(oldModel.id == newModel.id);
     assert(noteRef.containsKey(oldModel.id));
 
+    noteRef[newModel.id] = newModel;
     notesInCategory[oldModel.topicId].removeWhere((key) => key == oldModel.id);
     _addNoteToCategory(newModel);
   }

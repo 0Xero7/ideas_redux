@@ -23,9 +23,7 @@ void main() async {
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
-  });
-  
-
+  }); 
   
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -37,8 +35,10 @@ void main() async {
   var _topics = await TopicsDB.loadTopics();
 
   TopicState _topicState = TopicState();
-  for (var i in _topics)
+  for (var i in _topics) {
+    print('${i.id} ${i.order} ${i.topicName}');
     _topicState.addTopic(i);
+  }
 
   NoteState _state = NoteState();
 
@@ -75,6 +75,7 @@ class MyApp extends StatelessWidget {
           builder: (context, state, child) => MaterialApp(
             title: 'inScribe',
             theme: state.darkTheme ? darkTheme : lightTheme,
+            debugShowCheckedModeBanner: false,
 
             initialRoute: '/',
             onGenerateRoute: RouteGenerator.generateRoute,

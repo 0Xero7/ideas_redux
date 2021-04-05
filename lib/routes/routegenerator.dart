@@ -13,7 +13,7 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => StackedPage());
 
       case '/editentry':
-        return MaterialPageRoute(builder: (_) => NoteEntry(args as NoteModel));
+        return MaterialPageRoute(builder: (_) => NoteEntry(args));
 
       case '/about':
         return MaterialPageRoute(builder: (_) => AboutPage());

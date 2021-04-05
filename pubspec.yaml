@@ -35,7 +35,7 @@ dependencies:
   path_provider: ^1.6.11
   provider: ^4.3.1
   shared_preferences: ^0.5.8
-  flutter_reorderable_list: ^0.1.5
+  flutter_reorderable_list: ^1.0.0
   random_color: ^1.0.5
   local_auth: ^0.6.2+3
   encrypt: ^4.0.2
@@ -44,6 +44,14 @@ dependencies:
   flutter_icons: ^1.1.0
   image_picker: ^0.6.7+4
   sembast: ^2.4.8
+  url_launcher: ^6.0.3
+
+  flutter_launcher_icons: ^0.8.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/icon1.png"
 
 dev_dependencies:
   flutter_test:

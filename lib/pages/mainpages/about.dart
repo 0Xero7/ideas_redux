@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ideas_redux/widgets/back.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
   @override
@@ -46,13 +47,13 @@ class AboutPage extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'version 030820b1',
+                      'version 270321b4',
                       style: Theme.of(context).textTheme.subtitle2,
                     ),
-                    Opacity(
-                      opacity: 1,
-                      child: Text('this is an ALPHA version', style: TextStyle(fontSize: 10, color: Colors.red))
-                    ),
+                    // Opacity(
+                    //   opacity: 1,
+                    //   child: Text('this is an ALPHA version', style: TextStyle(fontSize: 10, color: Colors.red))
+                    // ),
                   ],
                 ),
               )
@@ -77,7 +78,9 @@ class AboutPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 0),
                 FlatButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    launch('https://github.com/0Xero7/');
+                  },
                   child: Text(
                     'Soumya Pattanayak',
                     style: Theme.of(context).textTheme.headline5,
@@ -99,8 +102,14 @@ class AboutPage extends StatelessWidget {
                       'Privacy Policy',
                       style: Theme.of(context).textTheme.subtitle1,
                     ),
-                    onPressed: () {
-                      
+                    onPressed: () async {
+                      if (await canLaunch('https://inscribe.flycricket.io/privacy.html')) {
+                        launch('https://inscribe.flycricket.io/privacy.html');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Could not open browser'))
+                        );
+                      }
                     },
                   )
                 ),

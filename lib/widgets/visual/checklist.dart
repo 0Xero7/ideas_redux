@@ -46,6 +46,8 @@ class _Checklist extends State<Checklist> {
                       hintText: "Note",
                       isDense: true
                     ),
+
+                    textCapitalization: TextCapitalization.sentences,
                     style: Theme.of(context).textTheme.subtitle1,
                     maxLines: null,
                   ),

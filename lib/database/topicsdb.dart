@@ -1,4 +1,6 @@
+import 'dart:collection';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:ideas_redux/models/topicmodel.dart';
@@ -14,18 +16,29 @@ class TopicsDB {
 
     // await Hive.deleteBoxFromDisk("topics");
     _topicBox = await Hive.openBox<String>("topics");
+
     if (!_topicBox.containsKey(1)) {
+      print('its not here buddy');
       var _topic = TopicModel(1, 'Other', 0);
       await updateTopic(_topic);
+    } else {
+      String json = _topicBox.get(1);
+      var model = TopicModel.fromMap((jsonDecode(json)) as Map<String, dynamic>);
+      if (model.order == null) {
+        var _topic = TopicModel(1, 'Other', 0);
+        await updateTopic(_topic);
+      }
     }
   }
 
   static Future<List<TopicModel>> loadTopics() async {
-    var res = List<TopicModel>();
+    List<TopicModel> res = [];
 
     for (var key in _topicBox.keys) {
       String json = _topicBox.get(key);
-            
+      
+      print(json);
+
       var model = TopicModel.fromMap((jsonDecode(json)) as Map<String, dynamic>);
       model.id = key;
 
@@ -33,6 +46,11 @@ class TopicsDB {
     }
 
     return res;
+  }
+
+  static Future<int> rewriteAll(HashMap<int, TopicModel> data) async {
+    for (var i in data.values)
+      await updateTopic(i);
   }
 
   static Future<int> addTopic(TopicModel model) async {

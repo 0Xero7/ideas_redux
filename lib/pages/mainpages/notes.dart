@@ -2,6 +2,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:ideas_redux/activeTopicBookkeeper.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc/topic_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
@@ -32,10 +33,29 @@ class Notes extends StatefulWidget {
 class _Notes extends State<Notes> with TickerProviderStateMixin {
   TabController _tabController;
   bool searching = false;
+  int _indexBeforeSearch = 0;
+
+  List<NoteModel> _deleted;
+  
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+
+    ActiveTopic.activeTopicIndex = BlocProvider.of<TopicBloc>(context).state.topicList[0];
+
+    _tabController = TabController(
+      vsync: this,
+      length: BlocProvider.of<TopicBloc>(context).state.topics.length
+    );
+    _tabController.addListener(() {
+      print('changing');
+      ActiveTopic.activeTopicIndex = 
+        BlocProvider.of<TopicBloc>(context).state.topicList[_tabController.index];
+    });
+
+    _deleted = [];
   }
 
   Widget _buildHeader(BuildContext ctx) {
@@ -85,6 +105,36 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
       ),
     );
   } 
+
+  Future<bool> _getDeleteConfirmation(context) async {
+    final bool res = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Warning'),
+        content: Text('Delete all selected notes?'),
+        actions: [
+          TextButton(
+            onPressed: () { Navigator.pop(context, false); },
+            child: Text(
+              'Cancel',
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context, true);
+            },
+            child: Text(
+              'Delete',
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return res;
+  }
   
   Widget _buildSelectionMenuRight(BuildContext ctx) {
     final SelectionState _state = Provider.of<SelectionState>(ctx);
@@ -135,9 +185,33 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
           const SizedBox(width: 10,),
           RoundButton(
             onPressed: () async {
-              for (int id in _state.selection)
+              var res = await _getDeleteConfirmation(context);
+              if (!res) return;
+
+              for (int id in _state.selection) {
+                _deleted.add( NoteModel.from( BlocProvider.of<NoteBloc>(context).state.noteRef[id] ) );
                 BlocProvider.of<NoteBloc>(context).add( NoteEvent.deleteNoteWithID(id) );
+              }
               _state.clearSelection();
+
+              
+              await ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Deleted'),
+                  action: SnackBarAction(
+                    label: 'Undo',
+                    onPressed: () { 
+                      for (var x in _deleted) {
+                        BlocProvider.of<NoteBloc>(context).add( NoteEvent.addNote(x) );
+                      }
+                    },
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                  duration: Duration(seconds: 3),
+                )
+              ).closed;
+              
+              _deleted.clear();
             },
             child: Padding(
               padding: const EdgeInsets.all(3.5),
@@ -168,6 +242,27 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
         ),
         onPressed: () {
           setState(() => searching = !searching);
+          
+          if (searching) {
+            _indexBeforeSearch = _tabController.index;
+            _tabController = TabController(
+              length: BlocProvider.of<TopicBloc>(context).state.topics.length + 1, 
+              vsync: this, 
+              initialIndex: 0
+            );
+          } else {
+            var _length = BlocProvider.of<TopicBloc>(context).state.topics.length;
+            _tabController = TabController(
+              length: _length, 
+              vsync: this, 
+              initialIndex: (_indexBeforeSearch < BlocProvider.of<TopicBloc>(context).state.topics.length ? _indexBeforeSearch : 0)
+            );
+          }
+
+          _tabController.addListener(() {
+            ActiveTopic.activeTopicIndex = 
+              BlocProvider.of<TopicBloc>(context).state.topicList[_tabController.index];
+          });
         },
       )
     );
@@ -176,7 +271,7 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
   String _searchString = "";
 
   Stream<List<int>> _getFilteredTopicNotes(BuildContext context, NoteState state, int topicId, String searchString) async* {
-    var res = new List<int>();
+    List<int> res = [];
 
     if (state.notesInCategory[topicId] == null) yield res;
     else {
@@ -189,6 +284,31 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
     }
 
     yield res;
+  }
+
+  Stream<List<int>> _getFilteredNotes(BuildContext context, NoteState state, String searchString) async* {
+    List<int> res = [];
+
+    for (var model in state.noteRef.values) {
+        if (model.title.toLowerCase().contains(searchString)) {
+          res.add(model.id);
+          yield res;
+        }
+    }
+
+    yield res;
+
+    // if (state.notesInCategory[topicId] == null) yield res;
+    // else {
+    //   for (var modelId in state.notesInCategory[topicId]) {
+    //     if (state.noteRef[modelId].title.toLowerCase().contains(searchString)) {
+    //       res.add(modelId);
+    //       yield res;
+    //     }
+    //   }
+    // }
+
+    // yield res;
   }
 
   Widget _buildSearchBox(context) {
@@ -241,14 +361,14 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
     );
   }
 
-  Widget buildStaggeredGridView(int topicKey) => 
-    BlocConsumer<NoteBloc, NoteState>(
+  Widget buildStaggeredGridView(int topicKey, [bool isSearchResults = false]) {
+    var gridView = BlocConsumer<NoteBloc, NoteState>(
       listener: (_, __) {},
       builder: (cxt, noteList) {
         return StreamBuilder(
-          stream: _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
+          stream: isSearchResults ? _getFilteredNotes(context, noteList, _searchString) : _getFilteredTopicNotes(context, noteList, topicKey, _searchString),
           builder: (context, snapshot) {
-            // print(snapshot.data.length);
+            // _rc = snapshot.data?.length ?? 0;
             return ((snapshot.data?.length ?? 0) == 0) ?
             Center(
               child: Opacity(
@@ -270,20 +390,20 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
 
             itemCount: snapshot.data?.length ?? 0,
             staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-            itemBuilder: (_, index) => NoteCard( noteList.noteRef[snapshot.data[index]] )
+            itemBuilder: (_, index) {
+              return NoteCard( noteList.noteRef[snapshot.data[index]] );
+            }
           );
           },
         );
       }
     );
 
+    return gridView;
+  }
+
   @override
   Widget build(BuildContext context) {
-    _tabController = TabController(
-      vsync: this,
-      length: BlocProvider.of<TopicBloc>(context).state.topics.length
-    );
-
     return ChangeNotifierProvider(
       create: (context) => SelectionState(),
       
@@ -351,9 +471,14 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
                           ),
 
                           tabs: List.generate(
-                            state.topics.length, 
-                            (index) => 
-                              Tab(child: Text(state.topics.values.elementAt(index).topicName, style: Theme.of(context).textTheme.subtitle1,),)
+                            state.topics.length + (searching ? 1 : 0), 
+                            (index) {
+                              return Tab(
+                                child: Text((searching && index == 0 ? "Search Results" :
+                                  state.topics[state.topicList[index - (searching ? 1 : 0)]].topicName), 
+                                style: Theme.of(context).textTheme.subtitle1,),
+                              );
+                            }
                           )
                         )
                       ),
@@ -361,10 +486,16 @@ class _Notes extends State<Notes> with TickerProviderStateMixin {
                         child: TabBarView(
                           controller: _tabController,
                           children: List.generate(
-                            BlocProvider.of<TopicBloc>(context).state.topics.length, 
-                            (index) => buildStaggeredGridView(
-                              BlocProvider.of<TopicBloc>(context).state.topics.keys.elementAt(index)
-                            )
+                            BlocProvider.of<TopicBloc>(context).state.topics.length + (searching ? 1 : 0), 
+                            (index) {
+                              if (searching && index == 0) return buildStaggeredGridView(
+                                0,
+                                true
+                              );
+                              else return buildStaggeredGridView(
+                                BlocProvider.of<TopicBloc>(context).state.topicList[index - (searching ? 1 : 0)]
+                              );
+                            }
                           )
                         ),
                       ),

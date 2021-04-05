@@ -4,6 +4,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:ideas_redux/bloc/note_bloc.dart';
 import 'package:ideas_redux/bloc_events/note_event.dart';
+import 'package:ideas_redux/models/notemodel.dart';
 import 'package:ideas_redux/state/note_state.dart';
 import 'package:ideas_redux/state/selection_state.dart';
 import 'package:ideas_redux/widgets/animatedposop.dart';
@@ -22,6 +23,14 @@ class Archived extends StatefulWidget {
 
 class _Archived extends State<Archived> {
   bool searchSelected = false;
+  List<NoteModel> _deleted;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _deleted = [];
+  }
 
   Widget _buildNameBar(BuildContext context) {
     final SelectionState state = Provider.of<SelectionState>(context);
@@ -68,6 +77,37 @@ class _Archived extends State<Archived> {
       ),
     );
   } 
+
+  
+  Future<bool> _getDeleteConfirmation(context) async {
+    final bool res = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Warning'),
+        content: Text('Delete all selected notes?'),
+        actions: [
+          TextButton(
+            onPressed: () { Navigator.pop(context, false); },
+            child: Text(
+              'Cancel',
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context, true);
+            },
+            child: Text(
+              'Delete',
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return res;
+  }
   
   Widget _buildSelectionMenuRight(BuildContext ctx) {
     final SelectionState _state = Provider.of<SelectionState>(ctx);
@@ -97,9 +137,33 @@ class _Archived extends State<Archived> {
           const SizedBox(width: 10,),
           RoundButton(
             onPressed: () async {
-              for (int id in _state.selection)
+              var res = await _getDeleteConfirmation(context);
+              if (!res) return;
+
+              for (int id in _state.selection) {
+                _deleted.add( NoteModel.from(BlocProvider.of<NoteBloc>(context).state.noteRef[id]) );
                 BlocProvider.of<NoteBloc>(context).add( NoteEvent.deleteNoteWithID(id) );
+              }
               _state.clearSelection();
+
+              
+              await ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Deleted'),
+                  action: SnackBarAction(
+                    label: 'Undo',
+                    onPressed: () { 
+                      for (var x in _deleted) {
+                        BlocProvider.of<NoteBloc>(context).add( NoteEvent.addNote(x) );
+                      }
+                    },
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                  duration: Duration(seconds: 3),
+                )
+              ).closed;
+              
+              _deleted.clear();
             },
             child: Padding(
               padding: const EdgeInsets.all(3.5),
