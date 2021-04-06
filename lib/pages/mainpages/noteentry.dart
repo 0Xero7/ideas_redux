@@ -14,6 +14,7 @@ import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
 import 'package:ideas_redux/models/datamodels/imagedatamodel.dart';
 import 'package:ideas_redux/models/datamodels/textdatamodel.dart';
 import 'package:ideas_redux/models/notemodel.dart';
+import 'package:ideas_redux/state/note_edit_state.dart';
 import 'package:ideas_redux/state/topic_state.dart';
 import 'package:ideas_redux/widgets/back.dart';
 import 'package:ideas_redux/widgets/pagewrapper.dart';
@@ -45,9 +46,13 @@ class NoteEntry extends StatefulWidget {
 }
 
 class _NoteEntry extends State<NoteEntry> {
+  NoteEditState state;
+
   @override
   void initState() {
     super.initState();
+
+    this.state = NoteEditState(widget.model);
   }
 
   Future saveNote() async {
@@ -64,172 +69,6 @@ class _NoteEntry extends State<NoteEntry> {
       BlocProvider.of<NoteBloc>(context).add( NoteEvent.updateNote(widget.oldModel, widget.model) );
     }
   }
-
-
-  // Widget _buildNonReorderList() {
-  //   // print("called");
-  //   List<Widget> res = List<Widget>();
-
-  //   for (var i in widget.model.data) {
-  //     switch (i.runtimeType) {
-  //       case TextDataModel:
-  //         res.add(
-  //           Dismissible(
-  //             key: UniqueKey(),
-  //             direction: DismissDirection.startToEnd,
-  //             onDismissed: (direction) {
-  //               setState(() {
-  //                 widget.model.data.remove(i);
-  //               });
-  //             },
-
-  //             background: Container(
-  //               color: Colors.red.shade100,
-  //               child: Row(
-  //                 children: [
-  //                   Icon(Icons.delete),
-  //                   Text('Delete')
-  //                 ],
-  //               ),
-  //             ),
-
-  //             child: Container(
-  //               child: Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 13),
-  //                 child: TextField(
-  //                   controller: TextEditingController(text: (i as TextDataModel).data),
-  //                   onChanged: (s) => (i as TextDataModel).data = s,
-  //                   decoration: InputDecoration(
-  //                     border: InputBorder.none,
-  //                     hintText: "Note",
-  //                     isDense: true
-  //                   ),
-  //                   textCapitalization: TextCapitalization.sentences,
-  //                   style: Theme.of(context).textTheme.subtitle1,
-  //                   maxLines: null,
-  //                 ),
-  //               ),
-  //             ),
-  //           )
-  //         );
-  //         break;
-
-  //       case ChecklistModel:
-  //         res.add(
-  //           Dismissible(
-  //             key: UniqueKey(),
-  //             direction: DismissDirection.startToEnd,
-  //             background: Container(
-  //               color: Colors.red.shade100,
-  //               child: Row(
-  //                 children: [
-  //                   Icon(Icons.delete),
-  //                   Text('Delete')
-  //                 ],
-  //               ),
-  //             ),
-  //             onDismissed: (direction) => setState(() => widget.model.data.remove(i)),
-  //             child: Container(
-  //               key: UniqueKey(),
-  //               child: Padding(
-  //                 padding: const EdgeInsets.only(right: 10, left: 2),
-  //                 child: Checklist(i as ChecklistModel)
-  //               ),
-  //             ),
-  //           )
-  //         );
-  //         break;
-  //     }
-  //   }
-
-  //   return ListView(
-  //     padding: EdgeInsets.only(bottom: 40),
-  //     children: res,
-  //   );
-  // }
-
-  // Widget _buildReorderableList(BuildContext context) {
-  //   List<Widget> res = List<Widget>();
-
-  //   for (var i in widget.model.data) {
-  //     switch (i.runtimeType) {
-  //       case TextDataModel:
-  //         res.add(
-  //           Container(
-  //             key: UniqueKey(),
-  //             child: Row(
-  //               children: [
-  //                 Padding(
-  //                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-  //                   child: widget.entryMode == NoteEntryMode.ReorderMode ? Icon(Icons.drag_handle) : Container(height: 24,),
-  //                 ),
-
-  //                 Expanded(
-  //                   child: Padding(
-  //                     padding: const EdgeInsets.only(right: 10),
-  //                     child: TextField(
-  //                       controller: TextEditingController(text: (i as TextDataModel).data),
-  //                       onChanged: (s) => (i as TextDataModel).data = s,
-  //                       decoration: InputDecoration(
-  //                         border: InputBorder.none,
-  //                         hintText: "Note",
-  //                         isDense: true
-  //                       ),
-
-  //                       textCapitalization: TextCapitalization.sentences,
-  //                       style: Theme.of(context).textTheme.subtitle1,
-  //                       maxLines: null,
-  //                     ),
-  //                   ),
-  //                 )
-  //               ],
-  //             ),
-  //           )
-  //         );
-  //         break;
-
-  //       case ChecklistModel:
-  //         res.add(
-  //           Container(
-  //             key: UniqueKey(),
-  //             child: Row(
-  //               children: [
-  //                 Padding(
-  //                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-  //                   child: widget.entryMode == NoteEntryMode.ReorderMode ? Icon(Icons.drag_handle) : Container(height: 24,),
-  //                 ),
-
-  //                 Expanded(
-  //                   child: Padding(
-  //                     padding: const EdgeInsets.only(right: 10),
-  //                     child: Checklist(i as ChecklistModel)
-  //                   ),
-  //                 )
-  //               ],
-  //             ),
-  //           )
-  //         );
-  //         break;
-  //     }
-  //   }
-
-  //   return ReorderableListView(
-  //     onReorder: (oldIndex, newIndex) {
-  //       print(oldIndex.toString() + "," + newIndex.toString());
-
-  //       if (oldIndex == newIndex) return;
-  //       if (newIndex < 0) newIndex = 0;
-  //       if (newIndex >= widget.model.data.length) newIndex = widget.model.data.length - 1;
-
-  //       setState(() {
-  //         var _temp = widget.model.data[oldIndex];
-  //         widget.model.data[oldIndex] = widget.model.data[newIndex];
-  //         widget.model.data[newIndex] = _temp;
-  //       });
-  //     },
-  //     children: res,
-  //   );
-  // }
 
   Widget _buildTopicButton(BuildContext context) {
     final TopicState state = BlocProvider.of<TopicBloc>(context).state;
