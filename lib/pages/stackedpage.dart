@@ -29,13 +29,14 @@ enum AppState {
 
 class _StackedPageState extends State<StackedPage> {
   int currentIndex;
-  AppState _appState = AppState.atNotes;
+  AppState _appState;
 
   @override
   void initState() {
     super.initState();
 
     currentIndex = 0;
+    _appState = AppState.atNotes;
   }
 
   void changeAppState(AppState newState) {
@@ -107,7 +108,7 @@ class _StackedPageState extends State<StackedPage> {
                   ),
                   Expanded(
                     child: FlatButton(child: Icon(Feather.list, size: 22,
-                      color: _appState == AppState.atTopics ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
+                      color: (_appState == AppState.atTopics || _appState == AppState.addingTopic) ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atTopics); }, highlightColor: Colors.transparent),
                   ),
                 ],
@@ -195,29 +196,14 @@ class _StackedPageState extends State<StackedPage> {
 
                 if (res != null)
                   BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res, -1) ) );
+
+                changeAppState(AppState.atTopics);
                 break;
             }
           },
         ) :
         null,
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(Icons.add),
-      //   onPressed: () async { 
-      //     switch (currentIndex) {
-      //       case 0:
-      //         final _state = BlocProvider.of<TopicBloc>(context).state.topics.keys.first;
-      //         Navigator.pushNamed(context, '/editentry', arguments: NoteModel.empty(_state)); 
-      //         break;
-      //       case 1:
-      //         changeAppState(AppState.addingTopic);
-      //         var res = await showTextDialog(context, () { changeAppState(AppState.atTopics); });
 
-      //         if (res != null)
-      //           BlocProvider.of<TopicBloc>(context).add( TopicEvent.addTopic( TopicModel(-1, res) ) );
-      //         break;
-      //     }
-      //   },
-      // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       body: SafeArea(

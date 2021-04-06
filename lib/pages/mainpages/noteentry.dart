@@ -177,7 +177,7 @@ class _NoteEntry extends State<NoteEntry> {
   }
 
   Widget _buildListChild(BuildContext context, int index) {
-    final i = widget.model.data[index];
+    final i = state.data[index];
 
     switch (widget.model.data[index].runtimeType) {
       case TextDataModel:
@@ -185,7 +185,9 @@ class _NoteEntry extends State<NoteEntry> {
           child: Padding(
             padding: const EdgeInsets.only(left: 13),
             child: TextField(
-              controller: TextEditingController(text: (i as TextDataModel).data),
+              controller: state.editControllers[index][0],
+              focusNode: state.focusNodes[index][0],
+
               onChanged: (s) => (i as TextDataModel).data = s,
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -205,7 +207,7 @@ class _NoteEntry extends State<NoteEntry> {
           key: UniqueKey(),
           child: Padding(
             padding: const EdgeInsets.only(left: 0),
-            child: Checklist(i as ChecklistModel)
+            child: Checklist((i as ChecklistModel), state.editControllers[index], state.focusNodes[index])
           ),
         );
         break;
@@ -272,6 +274,15 @@ class _NoteEntry extends State<NoteEntry> {
                   widget.model.data.removeAt(from);
                   widget.model.data.insert(to, _draggedItem);
                 });
+
+                final _draggedEC = state.editControllers[from];
+                state.editControllers.removeAt(from);
+                state.editControllers.insert(to, _draggedEC);
+
+                final _draggedFN = state.focusNodes[from];
+                state.focusNodes.removeAt(from);
+                state.focusNodes.insert(to, _draggedFN);
+
                 return true;
               },
               child: CustomScrollView(
@@ -385,6 +396,9 @@ class _NoteEntry extends State<NoteEntry> {
                                     direction: DismissDirection.startToEnd,
                                     onDismissed: (direction) {
                                       setState(() => widget.model.data.removeAt(_id));
+
+                                      state.editControllers.removeAt(_id);
+                                      state.focusNodes.removeAt(_id);
                                     },
 
                                     background: Container(
@@ -420,7 +434,7 @@ class _NoteEntry extends State<NoteEntry> {
                           return const SizedBox(height: 60); // end padding
                         },
 
-                        childCount: 1 + (2 * widget.model.data.length - 1) + 1,
+                        childCount: 1 + (2 * state.length - 1) + 1,
                       )
                     )
                   )
@@ -452,6 +466,7 @@ class _NoteEntry extends State<NoteEntry> {
                             onPressed: () {
                               setState(() {
                                 widget.model.data.add(TextDataModel(''));
+                                state.addEmptyTextModel().requestFocus();
                               });
                             },
                           ),
@@ -464,6 +479,8 @@ class _NoteEntry extends State<NoteEntry> {
                               widget.model.data.add(
                                 ChecklistModel.emptyWithEntry()
                               );
+
+                              state.addEmptyChecklist().requestFocus();
                             });
                           },
                         ),
@@ -519,6 +536,8 @@ class _NoteEntry extends State<NoteEntry> {
                                 setState(() {
                                   widget.model.data.add(ImageDataModel(file.path));
                                 });
+
+                                state.addEmpty();
                               }
                             },
                           ),

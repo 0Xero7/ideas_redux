@@ -12,6 +12,7 @@ class NoteEditState {
   List<List<FocusNode>> focusNodes;
 
   int get length => model.data?.length ?? 0;
+  List<BaseDataModel> get data => model.data;
 
   NoteEditState(this.model) {
     editControllers = [];
@@ -49,5 +50,23 @@ class NoteEditState {
         focusNodes.add( _focusNodes );
         break;
     }
+  }
+
+  FocusNode addEmptyTextModel() {
+    editControllers.add( [ TextEditingController() ] );
+    focusNodes.add( [ FocusNode() ] );
+    return focusNodes.last[0];
+  }
+
+  FocusNode addEmptyChecklist() {
+    editControllers.add( [ TextEditingController() ] );
+    focusNodes.add( [ FocusNode() ] );
+    return focusNodes.last[0];
+  }
+
+  FocusNode addEmpty() {
+    editControllers.add( [null] );
+    focusNodes.add( [null] );
+    return null;
   }
 }

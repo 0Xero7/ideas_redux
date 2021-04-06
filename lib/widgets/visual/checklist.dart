@@ -3,7 +3,10 @@ import 'package:ideas_redux/models/datamodels/checklistmodel.dart';
 
 class Checklist extends StatefulWidget {
   ChecklistModel model;
-  Checklist(this.model);
+  List<TextEditingController> textControllers;
+  List<FocusNode> focusNodes;
+
+  Checklist(this.model, this.textControllers, this.focusNodes);
 
   @override
   State<StatefulWidget> createState() {
@@ -38,7 +41,9 @@ class _Checklist extends State<Checklist> {
                 Expanded(
                   child: TextField(
                     key: UniqueKey(),
-                    controller: TextEditingController(text: widget.model.data[index].data),
+                    controller: widget.textControllers[index],
+                    focusNode: widget.focusNodes[index],
+                     //TextEditingController(text: widget.model.data[index].data),
                     onChanged: (e) => widget.model.data[index].data = e,
 
                     decoration: InputDecoration(
@@ -61,12 +66,16 @@ class _Checklist extends State<Checklist> {
           onPressed: () {
             setState(() {
               widget.model.addEmpty();
+              widget.textControllers.add( TextEditingController() );
+              widget.focusNodes.add( FocusNode() );
+
+              widget.focusNodes.last.requestFocus();
             });
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Icon(Icons.add, size: 25,),
+              Icon(Icons.add, size: 22,),
               Text(
                 'Add item',
                 style: Theme.of(context).textTheme.subtitle1
