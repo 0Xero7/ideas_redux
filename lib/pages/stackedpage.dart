@@ -92,8 +92,9 @@ class _StackedPageState extends State<StackedPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: FlatButton(
-                      child: Icon(Feather.home, size: 22,
+                    child: IconButton(
+                      splashRadius: 50,
+                      icon: Icon(Feather.home, size: 22,
                         color: _appState == AppState.atNotes ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                       ), 
                       onPressed: () { changeAppState(AppState.atNotes); }, highlightColor: Colors.transparent
@@ -107,7 +108,9 @@ class _StackedPageState extends State<StackedPage> {
                     ),
                   ),
                   Expanded(
-                    child: FlatButton(child: Icon(Feather.list, size: 22,
+                    child: IconButton(
+                      splashRadius: 50,
+                      icon: Icon(Feather.list, size: 22,
                       color: (_appState == AppState.atTopics || _appState == AppState.addingTopic) ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atTopics); }, highlightColor: Colors.transparent),
                   ),
@@ -133,7 +136,9 @@ class _StackedPageState extends State<StackedPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: FlatButton(child: Icon(Feather.archive, size: 21,
+                    child: IconButton(
+                      splashRadius: 50,
+                      icon: Icon(Feather.archive, size: 21,
                       color: _appState == AppState.atArchived ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atArchived); }, highlightColor: Colors.transparent),
                   ),
@@ -145,7 +150,9 @@ class _StackedPageState extends State<StackedPage> {
                     ),
                   ),
                   Expanded(
-                    child: FlatButton(child: Icon(Feather.settings, size: 20,
+                    child: IconButton(
+                      splashRadius: 50,
+                      icon: Icon(Feather.settings, size: 20,
                       color: _appState == AppState.atSettings ? Theme.of(context).accentColor : Theme.of(context).iconTheme.color,
                     ), onPressed: () { changeAppState(AppState.atSettings); }, highlightColor: Colors.transparent),
                   ),
